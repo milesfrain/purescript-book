@@ -39,6 +39,22 @@ person :: String -> String -> Address -> Array PhoneNumber -> Person
 person firstName lastName homeAddress phones =
   Person { firstName, lastName, homeAddress, phones }
 
+invalidPerson :: Person
+invalidPerson =
+  person "       " "      "
+         (address "     " "    " "ACA")
+         [ phoneNumber HomePhone "3555-555-5555"
+         , phoneNumber CellPhone "4555-555-0000"
+         ]
+
+invalidPerson2 :: Person
+invalidPerson2 =
+  person "       " "      "
+         (address "     " "    " "CA")
+         [ phoneNumber HomePhone "555-555-5555"
+         , phoneNumber CellPhone "555-555-0000"
+         ]
+
 examplePerson :: Person
 examplePerson =
   person "John" "Smith"

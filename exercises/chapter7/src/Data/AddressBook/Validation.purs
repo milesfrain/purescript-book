@@ -13,8 +13,7 @@ import Partial.Unsafe (unsafePartial)
 type Errors = Array String
 
 nonEmpty :: String -> String -> V Errors Unit
-nonEmpty field "" = invalid ["Field '" <> field <> "' cannot be empty"]
-nonEmpty _     _  = pure unit
+nonEmpty field value = matches field nonEmptyRegex value
 
 arrayNonEmpty :: forall a. String -> Array a -> V Errors Unit
 arrayNonEmpty field [] = invalid ["Field '" <> field <> "' must contain at least one value"]
@@ -30,6 +29,18 @@ phoneNumberRegex =
     case regex "^\\d{3}-\\d{3}-\\d{4}$" noFlags of
       Right r -> r
 
+stateRegex :: Regex
+stateRegex =
+  unsafePartial
+    case regex "^[a-zA-Z]{2}$" noFlags of
+      Right r -> r
+
+nonEmptyRegex :: Regex
+nonEmptyRegex =
+  unsafePartial
+    case regex "[^\\s]+$" noFlags of
+      Right r -> r
+
 matches :: String -> Regex -> String -> V Errors Unit
 matches _     regex value | test regex value = pure unit
 matches field _     _     = invalid ["Field '" <> field <> "' did not match the required format"]
@@ -38,13 +49,14 @@ validateAddress :: Address -> V Errors Address
 validateAddress (Address o) =
   address <$> (nonEmpty "Street" o.street *> pure o.street)
           <*> (nonEmpty "City"   o.city   *> pure o.city)
-          <*> (lengthIs "State" 2 o.state *> pure o.state)
+          <*> (matches "State" stateRegex o.state *> pure o.state)
 
 validateAddressAdo :: Address -> V Errors Address
 validateAddressAdo (Address o) = ado
   street  <- (nonEmpty "Street" o.street *> pure o.street)
   city    <- (nonEmpty "City"   o.city   *> pure o.city)
   state   <- (lengthIs "State" 2 o.state *> pure o.state)
+  state   <- (matches "State" stateRegex o.state *> pure o.state)
   in address street city state
 
 
