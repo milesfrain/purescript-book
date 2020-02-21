@@ -21,3 +21,7 @@ main = void $ unsafePartial do
     , width: 100.0
     , height: 100.0
     }
+
+  fillPath ctx $ do
+    rect ctx { x: 50.0, y: 50.0, width: 10.0, height: 10.0 }
+    rect ctx { x: 70.0, y: 70.0, width: 10.0, height: 10.0 }

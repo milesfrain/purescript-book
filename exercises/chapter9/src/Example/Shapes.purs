@@ -52,3 +52,19 @@ main = void $ unsafePartial do
     lineTo ctx 260.0 340.0
     lineTo ctx 340.0 340.0
     closePath ctx
+
+  setFillStyle ctx "#F0F"
+
+  fillPath ctx $ do
+    let
+      x = 500.0
+      y = 100.0
+    arc ctx
+      { x
+      , y
+      , radius: 50.0
+      , start: 0.0
+      , end: Math.tau * 2.0 / 3.0
+      }
+    lineTo ctx x y
+    closePath ctx
