@@ -10,9 +10,9 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(Nothing))
 import Data.Traversable (traverse)
 import Effect (Effect)
-import Effect.Alert (alert)
+import Effect.Alert (alert, confirm)
 import Effect.Console (log, logShow)
-import Effect.Storage (getItem, setItem)
+import Effect.Storage (getItem, removeItem, setItem)
 import Foreign (readNullOrUndefined, readString, renderForeignError)
 import Foreign.Class (class Decode, class Encode)
 import Foreign.Generic (decodeJSON, defaultOptions, encodeJSON, genericDecode, genericEncode)
@@ -34,7 +34,7 @@ instance showFormData :: Show FormData where
   show = genericShow
 
 loadSavedData :: Effect (Maybe FormData)
-loadSavedData = do 
+loadSavedData = do
   item <- getItem "person"
 
   let
@@ -46,7 +46,9 @@ loadSavedData = do
        Left err -> do
           alert $ "Unable to read saved form data: " <> foldMap (("\n" <> _) <<< renderForeignError) err
           pure Nothing
-       Right mdata -> pure mdata
+       Right mdata -> do
+         confirm "got saved data"
+         pure mdata
 
 main :: Effect Unit
 main = void do
@@ -58,4 +60,8 @@ main = void do
   setItem "person" $ encodeJSON rec
   log "Loading data from local storage"
   loadedRec <- loadSavedData
-  traverse logShow loadedRec
+  _ <- traverse logShow loadedRec
+  _ <- removeItem "person"
+  log "Removed data from local storage"
+  loadedRec2 <- loadSavedData
+  traverse logShow loadedRec2

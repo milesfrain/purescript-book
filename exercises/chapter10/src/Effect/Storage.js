@@ -13,3 +13,9 @@ exports.getItem = function(key) {
         return window.localStorage.getItem(key);
     }
 };
+
+exports.removeItem = function(key) {
+    return function() {
+        return window.localStorage.removeItem(key);
+    }
+};
