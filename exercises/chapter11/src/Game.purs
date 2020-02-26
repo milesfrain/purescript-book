@@ -7,7 +7,8 @@ import Control.Monad.Reader (ask)
 import Control.Monad.State (get, modify_, put)
 import Control.Monad.Writer (tell)
 import Data.Coords (Coords(..), prettyPrintCoords, coords)
-import Data.Foldable (for_)
+import Data.Foldable (for_, traverse_)
+import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.GameEnvironment (GameEnvironment(..))
 import Data.GameItem (GameItem(..), readItem)
 import Data.GameState (GameState(..))
@@ -41,6 +42,26 @@ pickUp item = do
                                 }
           tell (L.singleton ("You now have the " <> show item))
     _ -> tell (L.singleton "I don't see that item here.")
+
+pickUpAll :: Game Unit
+pickUpAll = do
+  GameState s1 <- get
+  traverseWithIndex_ transferItems s1.items
+  where
+    transferItems :: Coords -> S.Set GameItem -> Game Unit
+    transferItems c items = do
+      traverse_ (transferItem c) items
+
+    transferItem :: Coords -> GameItem -> Game Unit
+    transferItem c item = do
+      GameState state <- get
+      let
+        newItems = M.update (Just <<< S.delete item) c state.items
+        newInventory = S.insert item state.inventory
+      put $ GameState state { items     = newItems
+                            , inventory = newInventory
+                            }
+      tell (L.singleton ("You now have the " <> show item))
 
 move :: Int -> Int -> Game Unit
 move dx dy = modify_ (\(GameState state) -> GameState (state { player = updateCoords state.player }))
@@ -99,5 +120,6 @@ game ["debug"] = do
       state :: GameState <- get
       tell (L.singleton (show state))
     else tell (L.singleton "Not running in debug mode.")
+game ["cheat"] = pickUpAll
 game [] = pure unit
 game _  = tell (L.singleton "I don't understand.")
