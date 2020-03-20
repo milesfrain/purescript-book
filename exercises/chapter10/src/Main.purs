@@ -10,7 +10,7 @@ import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(Nothing))
 import Data.Traversable (traverse)
 import Effect (Effect)
-import Effect.Alert (alert)
+import Effect.Alert (alert, alertUncurried)
 import Effect.Console (log, logShow)
 import Effect.Storage (getItem, setItem)
 import Foreign (readNullOrUndefined, readString, renderForeignError)
@@ -34,7 +34,7 @@ instance showFormData :: Show FormData where
   show = genericShow
 
 loadSavedData :: Effect (Maybe FormData)
-loadSavedData = do 
+loadSavedData = do
   item <- getItem "person"
 
   let
@@ -57,5 +57,7 @@ main = void do
   log "Storing data into local storage"
   setItem "person" $ encodeJSON rec
   log "Loading data from local storage"
+  alert "hi"
+  alertUncurried "uncurried"
   loadedRec <- loadSavedData
   traverse logShow loadedRec

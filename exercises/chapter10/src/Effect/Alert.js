@@ -5,3 +5,7 @@ exports.alert = function(msg) {
         window.alert(msg);
     };
 };
+
+exports.alertUncurried = function(msg) {
+    window.alert(msg);
+};
