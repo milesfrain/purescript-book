@@ -1,7 +1,2 @@
-# purescript-book
-
-*Note that this is currently being updated for purescript 0.13. All chapters up to 7 have been updated. Chapter 8 is in progress*
-
-Text and exercises for the PureScript book
-
-
+This branch is to serve as a code example for this discourse question:
+https://discourse.purescript.org/t/curried-vs-uncurried-javascript-for-ffi/1250
