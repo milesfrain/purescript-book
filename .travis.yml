@@ -6,8 +6,9 @@ install:
 script:
   ./mdbook build
 deploy:
-  strategy: git
+  # strategy: git # Defaults to this
   provider: pages
+  cleanup: false # Default for dpl v2. skip_cleanup: true recommended for dpl v1
   local_dir: book
   token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
   on:
