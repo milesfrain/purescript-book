@@ -1,0 +1,11 @@
+dist: bionic
+install:
+  - wget https://github.com/rust-lang/mdBook/releases/download/v0.3.7/mdbook-v0.3.7-x86_64-unknown-linux-gnu.tar.gz
+  - tar -xzvf mdbook-*.tar.gz
+script:
+  mdbook build
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: book
+  github_token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
