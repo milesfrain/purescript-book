@@ -10,3 +10,5 @@ deploy:
   provider: pages
   local_dir: book
   token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  on:
+    branch: mdbook # Will default to master branch if on.branch is removed
