@@ -2,7 +2,7 @@
 
 ## Functional JavaScript
 
-Testing 123
+Testing foo
 
 Functional programming techniques have been making appearances in JavaScript for some time now:
 
