@@ -9,7 +9,7 @@ deploy:
   # strategy: git # Defaults to this
   provider: pages
   cleanup: false # Default for dpl v2. skip_cleanup: true recommended for dpl v1
-  local_dir: book
+  local_dir: book/
   keep_history: false # default
   target_branch: gh-pages # default
   verbose: true
