@@ -1,0 +1,585 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Callback Hell - PureScript by Example</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter2.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="chapter3.html"><strong aria-hidden="true">3.</strong> Functions and Records</a></li><li class="chapter-item expanded "><a href="chapter4.html"><strong aria-hidden="true">4.</strong> Recursion, Maps And Folds</a></li><li class="chapter-item expanded "><a href="chapter5.html"><strong aria-hidden="true">5.</strong> Pattern Matching</a></li><li class="chapter-item expanded "><a href="chapter6.html"><strong aria-hidden="true">6.</strong> Type Classes</a></li><li class="chapter-item expanded "><a href="chapter7.html"><strong aria-hidden="true">7.</strong> Applicative Validation</a></li><li class="chapter-item expanded "><a href="chapter8.html"><strong aria-hidden="true">8.</strong> The Effect and Aff Monads</a></li><li class="chapter-item expanded "><a href="chapter9.html"><strong aria-hidden="true">9.</strong> Canvas Graphics</a></li><li class="chapter-item expanded "><a href="chapter10.html"><strong aria-hidden="true">10.</strong> The Foreign Function Interface</a></li><li class="chapter-item expanded "><a href="chapter11.html"><strong aria-hidden="true">11.</strong> Monadic Adventures</a></li><li class="chapter-item expanded "><a href="chapter12.html" class="active"><strong aria-hidden="true">12.</strong> Callback Hell</a></li><li class="chapter-item expanded "><a href="chapter13.html"><strong aria-hidden="true">13.</strong> Generative Testing</a></li><li class="chapter-item expanded "><a href="chapter14.html"><strong aria-hidden="true">14.</strong> Domain-Specific Languages</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">PureScript by Example</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#callback-hell" id="callback-hell">Callback Hell</a></h1>
+<h2><a class="header" href="#chapter-goals" id="chapter-goals">Chapter Goals</a></h2>
+<p>In this chapter, we will see how the tools we have seen so far - namely monad transformers and applicative functors - can be put to use to solve real-world problems. In particular, we will see how we can solve the problem of <em>callback hell</em>.</p>
+<h2><a class="header" href="#project-setup" id="project-setup">Project Setup</a></h2>
+<p>The source code for this chapter can be compiled and run using <code>spago run</code>. It is also necessary to install the <code>request</code> module using NPM:</p>
+<pre><code class="language-text">npm install
+</code></pre>
+<h2><a class="header" href="#the-problem" id="the-problem">The Problem</a></h2>
+<p>Asynchronous code in JavaScript typically uses <em>callbacks</em> to structure program flow. For example, to read text from a file, the preferred approach is to use the <code>readFile</code> function and to pass a callback - a function that will be called when the text is available:</p>
+<pre><code class="language-javascript">function readText(onSuccess, onFailure) {
+  var fs = require('fs');
+  fs.readFile('file1.txt', { encoding: 'utf-8' }, function (error, data) {
+    if (error) {
+      onFailure(error.code);
+    } else {
+      onSuccess(data);
+    }   
+  });
+}
+</code></pre>
+<p>However, if multiple asynchronous operations are involved, this can quickly lead to nested callbacks, which can result in code which is difficult to read:</p>
+<pre><code class="language-javascript">function copyFile(onSuccess, onFailure) {
+  var fs = require('fs');
+  fs.readFile('file1.txt', { encoding: 'utf-8' }, function (error, data1) {
+    if (error) {
+      onFailure(error.code);
+    } else {
+      fs.writeFile('file2.txt', data, { encoding: 'utf-8' }, function (error) {
+        if (error) {
+          onFailure(error.code);
+        } else {
+          onSuccess();
+        }
+      });
+    }   
+  });
+}
+</code></pre>
+<p>One solution to this problem is to break out individual asynchronous calls into their own functions:</p>
+<pre><code class="language-javascript">function writeCopy(data, onSuccess, onFailure) {
+  var fs = require('fs');
+  fs.writeFile('file2.txt', data, { encoding: 'utf-8' }, function (error) {
+    if (error) {
+      onFailure(error.code);
+    } else {
+      onSuccess();
+    }
+  });
+}
+
+function copyFile(onSuccess, onFailure) {
+  var fs = require('fs');
+  fs.readFile('file1.txt', { encoding: 'utf-8' }, function (error, data) {
+    if (error) {
+      onFailure(error.code);
+    } else {
+      writeCopy(data, onSuccess, onFailure);
+    }   
+  });
+}
+</code></pre>
+<p>This solution works but has some issues:</p>
+<ul>
+<li>It is necessary to pass intermediate results to asynchronous functions as function arguments, in the same way that we passed <code>data</code> to <code>writeCopy</code> above. This is fine for small functions, but if there are many callbacks involved, the data dependencies can become complex, resulting in many additional function arguments.</li>
+<li>There is a common pattern - the callbacks <code>onSuccess</code> and <code>onFailure</code> are usually specified as arguments to every asynchronous function - but this pattern has to be documented in module documentation which accompanies the source code. It is better to capture this pattern in the type system, and to use the type system to enforce its use.</li>
+</ul>
+<p>Next, we will see how to use the techniques we have learned so far to solve these issues.</p>
+<h2><a class="header" href="#the-continuation-monad" id="the-continuation-monad">The Continuation Monad</a></h2>
+<p>Let's translate the <code>copyFile</code> example above into PureScript by using the FFI. In doing so, the structure of the computation will become apparent, and we will be led naturally to a monad transformer which is defined in the <code>transformers</code> package - the continuation monad transformer <code>ContT</code>.</p>
+<p><em>Note</em>: in practice, it is not necessary to write these functions by hand every time. Asynchronous file IO functions can be found in the <code>node-fs</code> and <code>node-fs-aff</code> libraries.</p>
+<p>First, we need to gives types to <code>readFile</code> and <code>writeFile</code> using the FFI. Let's start by defining some type synonyms, and a new effect for file IO:</p>
+<pre><code class="language-haskell">foreign import data FS :: Effect
+
+type ErrorCode = String
+type FilePath = String
+</code></pre>
+<p><code>readFile</code> takes a filename and a callback which takes two arguments. If the file was read successfully, the second argument will contain the file contents, and if not, the first argument will be used to indicate the error.</p>
+<p>In our case, we will wrap <code>readFile</code> with a function which takes two callbacks: an error callback (<code>onFailure</code>) and a result callback (<code>onSuccess</code>), much like we did with <code>copyFile</code> and <code>writeCopy</code> above. Using the multiple-argument function support from <code>Data.Function</code> for simplicity, our wrapped function <code>readFileImpl</code> might look like this:</p>
+<pre><code class="language-haskell">foreign import readFileImpl
+  :: forall eff
+   . Fn3 FilePath
+         (String -&gt; Eff (fs :: FS | eff) Unit)
+         (ErrorCode -&gt; Eff (fs :: FS | eff) Unit)
+         (Eff (fs :: FS | eff) Unit)
+</code></pre>
+<p>In the foreign JavaScript module, <code>readFileImpl</code> would be defined as:</p>
+<pre><code class="language-javascript">exports.readFileImpl = function(path, onSuccess, onFailure) {
+  return function() {
+    require('fs').readFile(path, {
+      encoding: 'utf-8'
+    }, function(error, data) {
+      if (error) {
+        onFailure(error.code)();
+      } else {
+        onSuccess(data)();
+      }
+    });
+  };
+};
+</code></pre>
+<p>This type signature indicates that <code>readFileImpl</code> takes three arguments: a file path, a success callback and an error callback, and returns an effectful computation which returns an empty (<code>Unit</code>) result. Notice that the callbacks themselves are given types which use the <code>Eff</code> monad to track their effects.</p>
+<p>You should try to understand why this implementation has the correct runtime representation for its type.</p>
+<p><code>writeFileImpl</code> is very similar - it is different only in that the file content is passed to the function itself, not to the callback. Its implementation looks like this:</p>
+<pre><code class="language-haskell">foreign import writeFileImpl
+  :: forall eff
+   . Fn4 FilePath
+         String
+         (Eff (fs :: FS | eff) Unit)
+         (ErrorCode -&gt; Eff (fs :: FS | eff) Unit)
+         (Eff (fs :: FS | eff) Unit)
+</code></pre>
+<pre><code class="language-javascript">exports.writeFileImpl = function(path, data, onSuccess, onFailure) {
+  return function() {
+    require('fs').writeFile(path, data, {
+      encoding: 'utf-8'
+    }, function(error) {
+      if (error) {
+        onFailure(error.code)();
+      } else {
+        onSuccess();
+      }
+    });
+  };
+};
+</code></pre>
+<p>Given these FFI declarations, we can write the implementations of <code>readFile</code> and <code>writeFile</code>. These will use the <code>Data.Function.Uncurried</code> module to turn the multiple-argument FFI bindings into regular (curried) PureScript functions, and therefore have slightly more readable types.</p>
+<p>In addition, instead of requiring two callbacks, one for successes and one for failures, we can require only a single callback which responds to <em>either</em> successes or failures. That is, the new callback takes a value in the <code>Either ErrorCode</code> monad as its argument:</p>
+<pre><code class="language-haskell">readFile
+  :: forall eff
+   . FilePath
+  -&gt; (Either ErrorCode String -&gt; Eff (fs :: FS | eff) Unit)
+  -&gt; Eff (fs :: FS | eff) Unit
+readFile path k =
+  runFn3 readFileImpl
+         path
+         (k &lt;&lt;&lt; Right)
+         (k &lt;&lt;&lt; Left)
+
+writeFile
+  :: forall eff
+   . FilePath
+  -&gt; String
+  -&gt; (Either ErrorCode Unit -&gt; Eff (fs :: FS | eff) Unit)
+  -&gt; Eff (fs :: FS | eff) Unit
+writeFile path text k =
+  runFn4 writeFileImpl
+         path
+         text
+         (k $ Right unit)
+         (k &lt;&lt;&lt; Left)
+</code></pre>
+<p>Now we can spot an important pattern. Each of these functions takes a callback which returns a value in some monad (in this case <code>Eff (fs :: FS | eff)</code>) and returns a value in <em>the same monad</em>. This means that when the first callback returns a result, that monad can be used to bind the result to the input of the next asynchronous function. In fact, that's exactly what we did by hand in the <code>copyFile</code> example.</p>
+<p>This is the basis of the <em>continuation monad transformer</em>, which is defined in the <code>Control.Monad.Cont.Trans</code> module in <code>transformers</code>.</p>
+<p><code>ContT</code> is defined as a newtype as follows:</p>
+<pre><code class="language-haskell">newtype ContT r m a = ContT ((a -&gt; m r) -&gt; m r)
+</code></pre>
+<p>A <em>continuation</em> is just another name for a callback. A continuation captures the <em>remainder</em> of a computation - in our case, what happens after a result has been provided after an asynchronous call.</p>
+<p>The argument to the <code>ContT</code> data constructor looks remarkably similar to the types of <code>readFile</code> and <code>writeFile</code>. In fact, if we take the type <code>a</code> to be the type <code>Either ErrorCode String</code>, <code>r</code> to be <code>Unit</code> and <code>m</code> to be the monad <code>Eff (fs :: FS | eff)</code>, we recover the right-hand side of the type of <code>readFile</code>.</p>
+<p>This motivates the following type synonym, defining an <code>Async</code> monad, which we will use to compose asynchronous actions like <code>readFile</code> and <code>writeFile</code>:</p>
+<pre><code class="language-haskell">type Async eff = ContT Unit (Eff eff)
+</code></pre>
+<p>For our purposes, we will always use <code>ContT</code> to transform the <code>Eff</code> monad, and the type <code>r</code> will always be <code>Unit</code>, but this is not required.</p>
+<p>We can treat <code>readFile</code> and <code>writeFile</code> as computations in the <code>Async</code> monad, by simply applying the <code>ContT</code> data constructor:</p>
+<pre><code class="language-haskell">readFileCont
+  :: forall eff
+   . FilePath
+  -&gt; Async (fs :: FS | eff) (Either ErrorCode String)
+readFileCont path = ContT $ readFile path
+
+writeFileCont
+  :: forall eff
+   . FilePath
+  -&gt; String
+  -&gt; Async (fs :: FS | eff) (Either ErrorCode Unit)
+writeFileCont path text = ContT $ writeFile path text
+</code></pre>
+<p>With that, we can write our copy-file routine by simply using do notation for the <code>ContT</code> monad transformer:</p>
+<pre><code class="language-haskell">copyFileCont
+  :: forall eff
+   . FilePath
+  -&gt; FilePath
+  -&gt; Async (fs :: FS | eff) (Either ErrorCode Unit)
+copyFileCont src dest = do
+  e &lt;- readFileCont src
+  case e of
+    Left err -&gt; pure $ Left err
+    Right content -&gt; writeFileCont dest content
+</code></pre>
+<p>Note how the asynchronous nature of <code>readFileCont</code> is hidden by the monadic bind expressed using do notation - this looks just like synchronous code, but the <code>ContT</code> monad is taking care of wiring our asynchronous functions together.</p>
+<p>We can run this computation using the <code>runContT</code> handler by providing a continuation. The continuation represents <em>what to do next</em>, i.e. what to do when the asynchronous copy-file routine completes. For our simple example, we can just choose the <code>logShow</code> function as the continuation, which will print the result of type <code>Either ErrorCode Unit</code> to the console:</p>
+<pre><code class="language-haskell">import Prelude
+
+import Control.Monad.Eff.Console (logShow)
+import Control.Monad.Cont.Trans (runContT)
+
+main =
+  runContT
+    (copyFileCont &quot;/tmp/1.txt&quot; &quot;/tmp/2.txt&quot;)
+    logShow
+</code></pre>
+<h2><a class="header" href="#exercises" id="exercises">Exercises</a></h2>
+<ol>
+<li>
+<p>(Easy) Use <code>readFileCont</code> and <code>writeFileCont</code> to write a function which concatenates two text files.</p>
+</li>
+<li>
+<p>(Medium) Use the FFI to give an appropriate type to the <code>setTimeout</code> function. Write a wrapper function which uses the <code>Async</code> monad:</p>
+<pre><code class="language-haskell">type Milliseconds = Int
+
+foreign import data TIMEOUT :: Effect
+
+setTimeoutCont
+  :: forall eff
+   . Milliseconds
+  -&gt; Async (timeout :: TIMEOUT | eff) Unit
+</code></pre>
+</li>
+</ol>
+<h2><a class="header" href="#putting-exceptt-to-work" id="putting-exceptt-to-work">Putting ExceptT To Work</a></h2>
+<p>This solution works, but it can be improved.</p>
+<p>In the implementation of <code>copyFileCont</code>, we had to use pattern matching to analyze the result of the <code>readFileCont</code> computation (of type <code>Either ErrorCode String</code>) to determine what to do next. However, we know that the <code>Either</code> monad has a corresponding monad transformer, <code>ExceptT</code>, so it is reasonable to expect that we should be able to use <code>ExceptT</code> with <code>ContT</code> to combine the two effects of asynchronous computation and error handling.</p>
+<p>In fact, it is possible, and we can see why if we look at the definition of <code>ExceptT</code>:</p>
+<pre><code class="language-haskell">newtype ExceptT e m a = ExceptT (m (Either e a))
+</code></pre>
+<p><code>ExceptT</code> simply changes the result of the underlying monad from <code>a</code> to <code>Either e a</code>. This means that we can rewrite <code>copyFileCont</code> by transforming our current monad stack with the <code>ExceptT ErrorCode</code> transformer. It is as simple as applying the <code>ExceptT</code> data constructor to our existing solution:</p>
+<pre><code class="language-haskell">readFileContEx
+  :: forall eff
+   . FilePath
+  -&gt; ExceptT ErrorCode (Async (fs :: FS | eff)) String
+readFileContEx path = ExceptT $ readFileCont path
+
+writeFileContEx
+  :: forall eff
+   . FilePath
+  -&gt; String
+  -&gt; ExceptT ErrorCode (Async (fs :: FS | eff)) Unit
+writeFileContEx path text = ExceptT $ writeFileCont path text
+</code></pre>
+<p>Now, our copy-file routine is much simpler, since the asynchronous error handling is hidden inside the <code>ExceptT</code> monad transformer:</p>
+<pre><code class="language-haskell">copyFileContEx
+  :: forall eff
+   . FilePath
+  -&gt; FilePath
+  -&gt; ExceptT ErrorCode (Async (fs :: FS | eff)) Unit
+copyFileContEx src dest = do
+  content &lt;- readFileContEx src
+  writeFileContEx dest content
+</code></pre>
+<h2><a class="header" href="#exercises-1" id="exercises-1">Exercises</a></h2>
+<ol>
+<li>(Medium) Modify your solution which concatenated two files, using <code>ExceptT</code> to handle any errors.</li>
+<li>(Medium) Write a function <code>concatenateMany</code> to concatenate multiple text files, given an array of input file names. <em>Hint</em>: use <code>traverse</code>.</li>
+</ol>
+<h2><a class="header" href="#a-http-client" id="a-http-client">A HTTP Client</a></h2>
+<p>As another example of using <code>ContT</code> to handle asynchronous functions, we'll now look at the <code>Network.HTTP.Client</code> module from this chapter's source code. This module uses the <code>Async</code> monad to support asynchronous HTTP requests using the <code>request</code> module, which is available via NPM.</p>
+<p>The <code>request</code> module provides a function which takes a URL and a callback, makes a HTTP(S) request and invokes the callback when the response is available, or in the event of an error. Here is an example request:</p>
+<pre><code class="language-javascript">require('request')('http://purescript.org'), function(err, _, body) {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log(body);
+  }
+});
+</code></pre>
+<p>We will recreate this simple example in PureScript using the <code>Async</code> monad.</p>
+<p>In the <code>Network.HTTP.Client</code> module, the <code>request</code> method is wrapped with a function <code>getImpl</code>:</p>
+<pre><code class="language-haskell">foreign import data HTTP :: Effect
+
+type URI = String
+
+foreign import getImpl
+  :: forall eff
+   . Fn3 URI
+         (String -&gt; Eff (http :: HTTP | eff) Unit)
+         (String -&gt; Eff (http :: HTTP | eff) Unit)
+         (Eff (http :: HTTP | eff) Unit)
+</code></pre>
+<pre><code class="language-javascript">exports.getImpl = function(uri, done, fail) {
+  return function() {
+    require('request')(uri, function(err, _, body) {
+      if (err) {
+        fail(err)();
+      } else {
+        done(body)();
+      }
+    });
+  };
+};
+</code></pre>
+<p>Again, we can use the <code>Data.Function.Uncurried</code> module to turn this into a regular, curried PureScript function. As before, we turn the two callbacks into a single callback, this time accepting a value of type <code>Either String String</code>, and apply the <code>ContT</code> constructor to construct an action in our <code>Async</code> monad:</p>
+<pre><code class="language-haskell">get :: forall eff.
+  URI -&gt;
+  Async (http :: HTTP | eff) (Either String String)
+get req = ContT \k -&gt;
+  runFn3 getImpl req (k &lt;&lt;&lt; Right) (k &lt;&lt;&lt; Left)
+</code></pre>
+<h2><a class="header" href="#exercises-2" id="exercises-2">Exercises</a></h2>
+<ol>
+<li>(Easy) Use <code>runContT</code> to test <code>get</code> in PSCi, printing the result to the console.</li>
+<li>(Medium) Use <code>ExceptT</code> to write a function <code>getEx</code> which wraps <code>get</code>, as we did previously for <code>readFileCont</code> and <code>writeFileCont</code>.</li>
+<li>(Difficult) Write a function which saves the response body of a request to a file on disk using <code>getEx</code> and <code>writeFileContEx</code>.</li>
+</ol>
+<h2><a class="header" href="#parallel-computations" id="parallel-computations">Parallel Computations</a></h2>
+<p>We've seen how to use the <code>ContT</code> monad and do notation to compose asynchronous computations in sequence. It would also be useful to be able to compose asynchronous computations <em>in parallel</em>.</p>
+<p>If we are using <code>ContT</code> to transform the <code>Eff</code> monad, then we can compute in parallel simply by initiating our two computations one after the other.</p>
+<p>The <code>parallel</code> package defines a type class <code>Parallel</code> for monads like <code>Async</code> which support parallel execution. When we met applicative functors earlier in the book, we observed how applicative functors can be useful for combining parallel computations. In fact, an instance for <code>Parallel</code> defines a correspondence between a monad <code>m</code> (such as <code>Async</code>) and an applicative functor <code>f</code> which can be used to combine computations in parallel:</p>
+<pre><code class="language-haskell">class (Monad m, Applicative f) &lt;= Parallel f m | m -&gt; f, f -&gt; m where
+  sequential :: forall a. f a -&gt; m a
+  parallel :: forall a. m a -&gt; f a
+</code></pre>
+<p>The class defines two functions:</p>
+<ul>
+<li><code>parallel</code>, which takes computations in the monad <code>m</code> and turns them into computations in the applicative functor <code>f</code>, and</li>
+<li><code>sequential</code>, which performs a conversion in the opposite direction.</li>
+</ul>
+<p>The <code>parallel</code> library provides a <code>Parallel</code> instance for the <code>Async</code> monad. It uses mutable references to combine <code>Async</code> actions in parallel, by keeping track of which of the two continuations has been called. When both results have been returned, we can compute the final result and pass it to the main continuation.</p>
+<p>We can use the <code>parallel</code> function to create a version of our <code>readFileCont</code> action which can be combined in parallel. Here is a simple example which reads two text files in parallel, and concatenates and prints their results:</p>
+<pre><code class="language-haskell">import Prelude
+import Control.Apply (lift2)
+import Control.Monad.Cont.Trans (runContT)
+import Control.Monad.Eff.Console (logShow)
+import Control.Monad.Parallel (parallel, sequential)
+
+main = flip runContT logShow do
+  sequential $
+   lift2 append
+     &lt;$&gt; parallel (readFileCont &quot;/tmp/1.txt&quot;)
+     &lt;*&gt; parallel (readFileCont &quot;/tmp/2.txt&quot;)
+</code></pre>
+<p>Note that, since <code>readFileCont</code> returns a value of type <code>Either ErrorCode String</code>, we need to lift the <code>append</code> function over the <code>Either</code> type constructor using <code>lift2</code> to form our combining function.</p>
+<p>Because applicative functors support lifting of functions of arbitrary arity, we can perform more computations in parallel by using the applicative combinators. We can also benefit from all of the standard library functions which work with applicative functors, such as <code>traverse</code> and <code>sequence</code>!</p>
+<p>We can also combine parallel computations with sequential portions of code, by using applicative combinators in a do notation block, or vice versa, using <code>parallel</code> and <code>sequential</code> to change type constructors where appropriate.</p>
+<h2><a class="header" href="#exercises-3" id="exercises-3">Exercises</a></h2>
+<ol>
+<li>
+<p>(Easy) Use <code>parallel</code> and <code>sequential</code> to make two HTTP requests and collect their response bodies in parallel. Your combining function should concatenate the two response bodies, and your continuation should use <code>print</code> to print the result to the console.</p>
+</li>
+<li>
+<p>(Medium) The applicative functor which corresponds to <code>Async</code> is also an instance of <code>Alternative</code>. The <code>&lt;|&gt;</code> operator defined by this instance runs two computations in parallel, and returns the result from the computation which completes first.</p>
+<p>Use this <code>Alternative</code> instance in conjunction with your <code>setTimeoutCont</code> function to define a function</p>
+<pre><code class="language-haskell">timeout :: forall a eff
+         . Milliseconds
+        -&gt; Async (timeout :: TIMEOUT | eff) a
+        -&gt; Async (timeout :: TIMEOUT | eff) (Maybe a)
+</code></pre>
+<p>which returns <code>Nothing</code> if the specified computation does not provide a result within the given number of milliseconds.</p>
+</li>
+<li>
+<p>(Medium) <code>parallel</code> also provides instances of the <code>Parallel</code> class for several monad transformers, including <code>ExceptT</code>.</p>
+<p>Rewrite the parallel file IO example to use <code>ExceptT</code> for error handling, instead of lifting <code>append</code> with <code>lift2</code>. Your solution should use the <code>ExceptT</code> transformer to transform the <code>Async</code> monad.</p>
+<p>Use this approach to modify your <code>concatenateMany</code> function to read multiple input files in parallel.</p>
+</li>
+<li>
+<p>(Difficult, Extended) Suppose we are given a collection of JSON documents on disk, such that each document contains an array of references to other files on disk:</p>
+<pre><code class="language-javascript">{ references: ['/tmp/1.json', '/tmp/2.json'] }
+</code></pre>
+<p>Write a utility which takes a single filename as input, and spiders the JSON files on disk referenced transitively by that file, collecting a list of all referenced files.</p>
+<p>Your utility should use the <code>foreign</code> library to parse the JSON documents, and should fetch files referenced by a single file in parallel.</p>
+</li>
+</ol>
+<h2><a class="header" href="#conclusion" id="conclusion">Conclusion</a></h2>
+<p>In this chapter, we have seen a practical demonstration of monad transformers:</p>
+<ul>
+<li>We saw how the common JavaScript idiom of callback-passing can be captured by the <code>ContT</code> monad transformer.</li>
+<li>We saw how the problem of callback hell can be solved by using do notation to express sequential asynchronous computations, and applicative functors to express parallelism.</li>
+<li>We used <code>ExceptT</code> to express <em>asynchronous errors</em>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="chapter11.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="chapter13.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="chapter11.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="chapter13.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

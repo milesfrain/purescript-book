@@ -1,0 +1,427 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Getting Started - PureScript by Example</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter2.html" class="active"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="chapter3.html"><strong aria-hidden="true">3.</strong> Functions and Records</a></li><li class="chapter-item expanded "><a href="chapter4.html"><strong aria-hidden="true">4.</strong> Recursion, Maps And Folds</a></li><li class="chapter-item expanded "><a href="chapter5.html"><strong aria-hidden="true">5.</strong> Pattern Matching</a></li><li class="chapter-item expanded "><a href="chapter6.html"><strong aria-hidden="true">6.</strong> Type Classes</a></li><li class="chapter-item expanded "><a href="chapter7.html"><strong aria-hidden="true">7.</strong> Applicative Validation</a></li><li class="chapter-item expanded "><a href="chapter8.html"><strong aria-hidden="true">8.</strong> The Effect and Aff Monads</a></li><li class="chapter-item expanded "><a href="chapter9.html"><strong aria-hidden="true">9.</strong> Canvas Graphics</a></li><li class="chapter-item expanded "><a href="chapter10.html"><strong aria-hidden="true">10.</strong> The Foreign Function Interface</a></li><li class="chapter-item expanded "><a href="chapter11.html"><strong aria-hidden="true">11.</strong> Monadic Adventures</a></li><li class="chapter-item expanded "><a href="chapter12.html"><strong aria-hidden="true">12.</strong> Callback Hell</a></li><li class="chapter-item expanded "><a href="chapter13.html"><strong aria-hidden="true">13.</strong> Generative Testing</a></li><li class="chapter-item expanded "><a href="chapter14.html"><strong aria-hidden="true">14.</strong> Domain-Specific Languages</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">PureScript by Example</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#getting-started" id="getting-started">Getting Started</a></h1>
+<h2><a class="header" href="#chapter-goals" id="chapter-goals">Chapter Goals</a></h2>
+<p>In this chapter, the goal will be to set up a working PureScript development environment and to write our first PureScript program.</p>
+<p>Our first project will be a very simple PureScript library, which will provide a single function that can compute the length of the diagonal in a right-angled triangle.</p>
+<h2><a class="header" href="#introduction" id="introduction">Introduction</a></h2>
+<p>Here are the tools we will be using to set up our PureScript development environment:</p>
+<ul>
+<li><a href="https://www.purescript.org"><code>purs</code></a> - The PureScript compiler itself.</li>
+<li><a href="https://www.npmjs.com"><code>npm</code></a> - The Node Package Manager, which will allow us to install the rest of our development tools.</li>
+<li><a href="https://github.com/purescript/spago"><code>spago</code></a> - A command-line tool that automates many of the tasks associated with managing PureScript projects.</li>
+</ul>
+<p>The rest of the chapter will guide you through installing and configuring these tools.</p>
+<h2><a class="header" href="#installing-purescript" id="installing-purescript">Installing PureScript</a></h2>
+<p>The recommended approach to installing the PureScript compiler is to download a binary release for your platform from the <a href="https://www.purescript.org">PureScript website</a>.</p>
+<p>You should verify that the PureScript compiler executables are available on your path. Try running the PureScript compiler on the command line to verify this:</p>
+<pre><code class="language-text">$ purs
+</code></pre>
+<p>Other options for installing the PureScript compiler include:</p>
+<ul>
+<li>Via NPM: <code>npm install -g purescript</code>.</li>
+<li>Building the compiler from source. Instructions can be found on the PureScript website.</li>
+</ul>
+<h2><a class="header" href="#installing-tools" id="installing-tools">Installing Tools</a></h2>
+<p>If you do not have a working installation of <a href="https://nodejs.org">NodeJS</a>, you should install it. This should also install the <code>npm</code> package manager on your system. Make sure you have <code>npm</code> installed and available on your path.</p>
+<p>Spago is a PureScript build tool and package manager. You will need to install it using <code>npm</code>, as follows:</p>
+<pre><code class="language-text">$ npm install -g spago
+</code></pre>
+<p>This will place the <code>spago</code> command-line tools on your path. At this point, you will have all the necessary tools to create your first PureScript project.</p>
+<h2><a class="header" href="#hello-purescript" id="hello-purescript">Hello, PureScript!</a></h2>
+<p>Let's start out simple. We'll use Spago to compile and run a simple Hello World! program.</p>
+<p>Begin by creating a project in an empty directory and use the <code>spago init</code> command to initialize the project:</p>
+<pre><code class="language-text">$ mkdir my-project
+$ cd my-project
+$ spago init
+Initializing a sample project or migrating an existing one..
+
+$ ls
+packages.dhall	spago.dhall	src		test
+</code></pre>
+<p>Spago has created a number of directories and configuration files. The <code>src</code> directory will contain our source files and the <code>test</code> directory will contain any tests we write. The <code>spago.dhall</code> file contains the project configuration.</p>
+<!-- XXX packages.dhall -->
+<p>Modify the <code>src/Main.purs</code> file to contain the following content:</p>
+<pre><code class="language-haskell">module Main where
+
+import Effect.Console
+
+main = log &quot;Hello, World!&quot;
+</code></pre>
+<p>This small sample illustrates a few key ideas:</p>
+<ul>
+<li>Every file begins with a module header. A module name consists of one or more capitalized words separated by dots. In this case, only a single word is used, but <code>My.First.Module</code> would be an equally valid module name.</li>
+<li>Modules are imported using their full names, including dots to separate the parts of the module name. Here, we import the <code>Effect.Console</code> module, which provides the <code>log</code> function.</li>
+<li>The <code>main</code> program is defined as a function application. In PureScript, function application is indicated with whitespace separating the function name from its arguments.</li>
+</ul>
+<p>Let's build and run this code using the following command:</p>
+<pre><code class="language-text">$ spago run
+...
+Build succeeded.
+Hello, World!
+</code></pre>
+<p>Congratulations! You just compiled and executed your first PureScript program.</p>
+<h2><a class="header" href="#compiling-for-the-browser" id="compiling-for-the-browser">Compiling for the Browser</a></h2>
+<p>Spago can be used to turn our PureScript code into JavaScript suitable for use in the web browser by using the <code>spago bundle-app</code> command:</p>
+<pre><code class="language-text">$ spago bundle-app
+...
+Build succeeded.
+Bundle succeeded and output file to index.js
+</code></pre>
+<p>All the code in the <code>src</code> directory, a standard PureScript library known as the <em>Prelude</em> and any project dependencies have been compiled to JavaScript. The resulting code is bundled as <code>index.js</code> and has also had any unused code removed, a process known as dead-code-elimination. This <code>index.js</code> file can now be included in an HTML document. If you try this, you should see the words &quot;Hello, World!&quot; printed to your browser's console.</p>
+<p>If you open <code>index.js</code>, you should see a few compiled modules which look like this:</p>
+<pre><code class="language-javascript">// Generated by purs bundle 0.13.3
+var PS = {};
+(function(exports) {
+  &quot;use strict&quot;;
+
+  exports.log = function (s) {
+    return function () {
+      console.log(s);
+      return {};
+    };
+  };
+})(PS[&quot;Effect.Console&quot;] = PS[&quot;Effect.Console&quot;] || {});
+(function($PS) {
+  // Generated by purs version 0.13.3
+  &quot;use strict&quot;;
+  $PS[&quot;Effect.Console&quot;] = $PS[&quot;Effect.Console&quot;] || {};
+  var exports = $PS[&quot;Effect.Console&quot;];
+  var $foreign = $PS[&quot;Effect.Console&quot;];
+  exports[&quot;log&quot;] = $foreign.log;
+})(PS);
+(function($PS) {
+  // Generated by purs version 0.13.3
+  &quot;use strict&quot;;
+  $PS[&quot;Main&quot;] = $PS[&quot;Main&quot;] || {};
+  var exports = $PS[&quot;Main&quot;];
+  var Effect_Console = $PS[&quot;Effect.Console&quot;];
+  var main = Effect_Console.log(&quot;Hello, World!&quot;);
+  exports[&quot;main&quot;] = main;
+})(PS);
+PS[&quot;Main&quot;].main();
+</code></pre>
+<p>This illustrates a few points about the way the PureScript compiler generates JavaScript code:</p>
+<ul>
+<li>Every module gets turned into an object, created by a wrapper function, which contains the module's exported members.</li>
+<li>PureScript tries to preserve the names of variables wherever possible.</li>
+<li>Function applications in PureScript get turned into function applications in JavaScript.</li>
+<li>The main method is run after all modules have been defined and is generated as a simple method call with no arguments.</li>
+<li>PureScript code does not rely on any runtime libraries. All of the code that is generated by the compiler originated in a PureScript module somewhere which your code depended on.</li>
+</ul>
+<p>These points are important since they mean that PureScript generates simple, understandable code. The code generation process, in general, is quite a shallow transformation. It takes relatively little understanding of the language to predict what JavaScript code will be generated for a particular input.</p>
+<h2><a class="header" href="#compiling-commonjs-modules" id="compiling-commonjs-modules">Compiling CommonJS Modules</a></h2>
+<p>Spago can also be used to generate CommonJS modules from PureScript code. This can be useful when using NodeJS, or just when developing a larger project which uses CommonJS modules to break code into smaller components.</p>
+<p>To build CommonJS modules, use the <code>spago build</code> command:</p>
+<pre><code class="language-text">$ spago build
+...
+Build succeeded.
+</code></pre>
+<p>The generated modules will be placed in the <code>output</code> directory by default. Each PureScript module will be compiled to its own CommonJS module, in its own subdirectory.</p>
+<h2><a class="header" href="#tracking-dependencies" id="tracking-dependencies">Tracking Dependencies</a></h2>
+<p>To write the <code>diagonal</code> function (the goal of this chapter), we will need to be able to compute square roots. The <code>math</code> package contains type definitions for functions defined on the JavaScript <code>Math</code> object, so let's install it:</p>
+<pre><code class="language-text">$ spago install math
+</code></pre>
+<p>The <code>math</code> library sources should now be available in the <code>.spago/math/{version}/</code> subdirectory, and will be included when you compile your project.</p>
+<h2><a class="header" href="#computing-diagonals" id="computing-diagonals">Computing Diagonals</a></h2>
+<p>Let's write the <code>diagonal</code> function, which will be an example of using a function from an external library.</p>
+<p>First, import the <code>Math</code> module by adding the following line at the top of the <code>src/Main.purs</code> file:</p>
+<pre><code class="language-haskell">import Math (sqrt)
+</code></pre>
+<p>It's also necessary to import the <code>Prelude</code> module, which defines very basic operations such as numeric addition and multiplication:</p>
+<pre><code class="language-haskell">import Prelude
+</code></pre>
+<p>Now define the <code>diagonal</code> function as follows:</p>
+<pre><code class="language-haskell">diagonal w h = sqrt (w * w + h * h)
+</code></pre>
+<p>Note that there is no need to define a type for our function. The compiler can infer that <code>diagonal</code> is a function that takes two numbers and returns a number. In general, however, it is a good practice to provide type annotations as a form of documentation.</p>
+<p>Let's also modify the <code>main</code> function to use the new <code>diagonal</code> function:</p>
+<pre><code class="language-haskell">main = logShow (diagonal 3.0 4.0)
+</code></pre>
+<p>Now compile and run the project again, using <code>spago run</code>:</p>
+<pre><code class="language-text">$ spago run
+...
+Build succeeded.
+5.0
+</code></pre>
+<h2><a class="header" href="#testing-code-using-the-interactive-mode" id="testing-code-using-the-interactive-mode">Testing Code Using the Interactive Mode</a></h2>
+<p>The PureScript compiler also ships with an interactive REPL called PSCi. This can be very useful for testing your code and experimenting with new ideas. Let's use PSCi to test the <code>diagonal</code> function.</p>
+<p>Spago can load source modules into PSCi automatically, via the <code>spago repl</code> command:</p>
+<pre><code class="language-text">$ spago repl
+&gt;
+</code></pre>
+<p>You can type <code>:?</code> to see a list of commands:</p>
+<pre><code class="language-text">&gt; :?
+The following commands are available:
+
+    :?                        Show this help menu
+    :quit                     Quit PSCi
+    :reload                   Reload all imported modules while discarding bindings
+    :clear                    Discard all imported modules and declared bindings
+    :browse      &lt;module&gt;     See all functions in &lt;module&gt;
+    :type        &lt;expr&gt;       Show the type of &lt;expr&gt;
+    :kind        &lt;type&gt;       Show the kind of &lt;type&gt;
+    :show        import       Show all imported modules
+    :show        loaded       Show all loaded modules
+    :show        print        Show the repl's current printing function
+    :paste       paste        Enter multiple lines, terminated by ^D
+    :complete    &lt;prefix&gt;     Show completions for &lt;prefix&gt; as if pressing tab
+    :print       &lt;fn&gt;         Set the repl's printing function to &lt;fn&gt; (which must be fully qualified)
+</code></pre>
+<p>By pressing the Tab key, you should be able to see a list of all functions available in your own code, as well as any project dependencies and the Prelude modules.</p>
+<p>Start by importing the <code>Prelude</code> module:</p>
+<pre><code class="language-text">&gt; import Prelude
+</code></pre>
+<p>Try evaluating a few expressions now:</p>
+<pre><code class="language-text">&gt; 1 + 2
+3
+
+&gt; &quot;Hello, &quot; &lt;&gt; &quot;World!&quot;
+&quot;Hello, World!&quot;
+</code></pre>
+<p>Let's try out our new <code>diagonal</code> function in PSCi:</p>
+<pre><code class="language-text">&gt; import Main
+&gt; diagonal 5.0 12.0
+
+13.0
+</code></pre>
+<p>You can also use PSCi to define functions:</p>
+<pre><code class="language-text">&gt; double x = x * 2
+
+&gt; double 10
+20
+</code></pre>
+<p>Don't worry if the syntax of these examples is unclear right now - it will make more sense as you read through the book.</p>
+<p>Finally, you can check the type of an expression by using the <code>:type</code> command:</p>
+<pre><code class="language-text">&gt; :type true
+Boolean
+
+&gt; :type [1, 2, 3]
+Array Int
+</code></pre>
+<p>Try out the interactive mode now. If you get stuck at any point, simply use the Clear command <code>:clear</code> to unload any modules which may be compiled in memory.</p>
+<h2><a class="header" href="#exercises" id="exercises">Exercises</a></h2>
+<ol>
+<li>(Easy) Use the <code>pi</code> constant, which is defined in the <code>Math</code> module, to write a function <code>circleArea</code> which computes the area of a circle with a given radius. Test your function using PSCi (<em>Hint</em>: don't forget to import <code>pi</code> by modifying the <code>import Math</code> statement).</li>
+<li>(Medium) Use <code>spago install</code> to install the <code>globals</code> package as a dependency. Test out its functions in PSCi (<em>Hint</em>: you can use the <code>:browse</code> command in PSCi to browse the contents of a module; try <code>:browse Global</code> and compare what PSCi tells you to what you find in <strong><a href="https://pursuit.purescript.org/packages/purescript-globals/4.1.0/docs/Global">Pursuit</a></strong>).</li>
+</ol>
+<h2><a class="header" href="#conclusion" id="conclusion">Conclusion</a></h2>
+<p>In this chapter, we set up a simple PureScript project using the Spago tool.</p>
+<p>We also wrote our first PureScript function and a JavaScript program which could be compiled and executed either in the browser or in NodeJS.</p>
+<p>We will use this development setup in the following chapters to compile, debug and test our code, so you should make sure that you are comfortable with the tools and techniques involved.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="chapter1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="chapter3.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="chapter1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="chapter3.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

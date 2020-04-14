@@ -1,0 +1,681 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>The Effect and Aff Monads - PureScript by Example</title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter2.html"><strong aria-hidden="true">2.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="chapter3.html"><strong aria-hidden="true">3.</strong> Functions and Records</a></li><li class="chapter-item expanded "><a href="chapter4.html"><strong aria-hidden="true">4.</strong> Recursion, Maps And Folds</a></li><li class="chapter-item expanded "><a href="chapter5.html"><strong aria-hidden="true">5.</strong> Pattern Matching</a></li><li class="chapter-item expanded "><a href="chapter6.html"><strong aria-hidden="true">6.</strong> Type Classes</a></li><li class="chapter-item expanded "><a href="chapter7.html"><strong aria-hidden="true">7.</strong> Applicative Validation</a></li><li class="chapter-item expanded "><a href="chapter8.html" class="active"><strong aria-hidden="true">8.</strong> The Effect and Aff Monads</a></li><li class="chapter-item expanded "><a href="chapter9.html"><strong aria-hidden="true">9.</strong> Canvas Graphics</a></li><li class="chapter-item expanded "><a href="chapter10.html"><strong aria-hidden="true">10.</strong> The Foreign Function Interface</a></li><li class="chapter-item expanded "><a href="chapter11.html"><strong aria-hidden="true">11.</strong> Monadic Adventures</a></li><li class="chapter-item expanded "><a href="chapter12.html"><strong aria-hidden="true">12.</strong> Callback Hell</a></li><li class="chapter-item expanded "><a href="chapter13.html"><strong aria-hidden="true">13.</strong> Generative Testing</a></li><li class="chapter-item expanded "><a href="chapter14.html"><strong aria-hidden="true">14.</strong> Domain-Specific Languages</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">PureScript by Example</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#the-effect-and-aff-monads" id="the-effect-and-aff-monads">The Effect and Aff Monads</a></h1>
+<h2><a class="header" href="#chapter-goals" id="chapter-goals">Chapter Goals</a></h2>
+<p>In the last chapter, we introduced applicative functors, an abstraction which we used to deal with <em>side-effects</em>: optional values, error messages and validation. This chapter will introduce another abstraction for dealing with side-effects in a more expressive way: <em>monads</em>.</p>
+<p>The goal of this chapter is to explain why monads are a useful abstraction, and their connection with <em>do notation</em>. We will also learn how to do computations with <em>asynchronous side-effects</em>.</p>
+<h2><a class="header" href="#project-setup" id="project-setup">Project Setup</a></h2>
+<p>The project adds the following dependencies:</p>
+<ul>
+<li><code>effect</code>, which defines the <code>Effect</code> monad, the subject of the second half of the chapter.</li>
+<li><code>aff</code>, an asynchronous effect monad.</li>
+<li><code>random</code>, a monadic random number generator.</li>
+</ul>
+<h2><a class="header" href="#monads-and-do-notation" id="monads-and-do-notation">Monads and Do Notation</a></h2>
+<p>Do notation was first introduced when we covered <em>array comprehensions</em>. Array comprehensions provide syntactic sugar for the <code>concatMap</code> function from the <code>Data.Array</code> module.</p>
+<p>Consider the following example. Suppose we throw two dice and want to count the number of ways in which we can score a total of <code>n</code>. We could do this using the following non-deterministic algorithm:</p>
+<ul>
+<li><em>Choose</em> the value <code>x</code> of the first throw.</li>
+<li><em>Choose</em> the value <code>y</code> of the second throw.</li>
+<li>If the sum of <code>x</code> and <code>y</code> is <code>n</code> then return the pair <code>[x, y]</code>, else fail.</li>
+</ul>
+<p>Array comprehensions allow us to write this non-deterministic algorithm in a natural way:</p>
+<pre><code class="language-haskell">import Prelude
+
+import Control.Plus (empty)
+import Data.Array ((..))
+
+countThrows :: Int -&gt; Array (Array Int)
+countThrows n = do
+  x &lt;- 1 .. 6
+  y &lt;- 1 .. 6
+  if x + y == n
+    then pure [x, y]
+    else empty
+</code></pre>
+<p>We can see that this function works in PSCi:</p>
+<pre><code class="language-text">&gt; countThrows 10
+[[4,6],[5,5],[6,4]]
+
+&gt; countThrows 12  
+[[6,6]]
+</code></pre>
+<p>In the last chapter, we formed an intuition for the <code>Maybe</code> applicative functor, embedding PureScript functions into a larger programming language supporting <em>optional values</em>. In the same way, we can form an intuition for the <em>array monad</em>, embedding PureScript functions into a larger programming language supporting <em>non-deterministic choice</em>.</p>
+<p>In general, a <em>monad</em> for some type constructor <code>m</code> provides a way to use do notation with values of type <code>m a</code>. Note that in the array comprehension above, every line contains a computation of type <code>Array a</code> for some type <code>a</code>. In general, every line of a do notation block will contain a computation of type <code>m a</code> for some type <code>a</code> and our monad <code>m</code>. The monad <code>m</code> must be the same on every line (i.e. we fix the side-effect), but the types <code>a</code> can differ (i.e. individual computations can have different result types).</p>
+<p>Here is another example of do notation, this type applied to the type constructor <code>Maybe</code>. Suppose we have some type <code>XML</code> representing XML nodes, and a function</p>
+<pre><code class="language-haskell">child :: XML -&gt; String -&gt; Maybe XML
+</code></pre>
+<p>which looks for a child element of a node, and returns <code>Nothing</code> if no such element exists.</p>
+<p>In this case, we can look for a deeply-nested element by using do notation. Suppose we wanted to read a user's city from a user profile which had been encoded as an XML document:</p>
+<pre><code class="language-haskell">userCity :: XML -&gt; Maybe XML
+userCity root = do
+  prof &lt;- child root &quot;profile&quot;
+  addr &lt;- child prof &quot;address&quot;
+  city &lt;- child addr &quot;city&quot;
+  pure city
+</code></pre>
+<p>The <code>userCity</code> function looks for a child element <code>profile</code>, an element <code>address</code> inside the <code>profile</code> element, and finally an element <code>city</code> inside the <code>address</code> element. If any of these elements are missing, the return value will be <code>Nothing</code>. Otherwise, the return value is constructed using <code>Just</code> from the <code>city</code> node.</p>
+<p>Remember, the <code>pure</code> function in the last line is defined for every <code>Applicative</code> functor. Since <code>pure</code> is defined as <code>Just</code> for the <code>Maybe</code> applicative functor, it would be equally valid to change the last line to <code>Just city</code>.</p>
+<h2><a class="header" href="#the-monad-type-class" id="the-monad-type-class">The Monad Type Class</a></h2>
+<p>The <code>Monad</code> type class is defined as follows:</p>
+<pre><code class="language-haskell">class Apply m &lt;= Bind m where
+  bind :: forall a b. m a -&gt; (a -&gt; m b) -&gt; m b
+
+class (Applicative m, Bind m) &lt;= Monad m
+</code></pre>
+<p>The key function here is <code>bind</code>, defined in the <code>Bind</code> type class. Just like for the <code>&lt;$&gt;</code> and <code>&lt;*&gt;</code> operators in the <code>Functor</code> and <code>Apply</code> type classes, the Prelude defines an infix alias <code>&gt;&gt;=</code> for the <code>bind</code> function.</p>
+<p>The <code>Monad</code> type class extends <code>Bind</code> with the operations of the <code>Applicative</code> type class that we have already seen.</p>
+<p>It will be useful to see some examples of the <code>Bind</code> type class. A sensible definition for <code>Bind</code> on arrays can be given as follows:</p>
+<pre><code class="language-haskell">instance bindArray :: Bind Array where
+  bind xs f = concatMap f xs
+</code></pre>
+<p>This explains the connection between array comprehensions and the <code>concatMap</code> function that has been alluded to before.</p>
+<p>Here is an implementation of <code>Bind</code> for the <code>Maybe</code> type constructor:</p>
+<pre><code class="language-haskell">instance bindMaybe :: Bind Maybe where
+  bind Nothing  _ = Nothing
+  bind (Just a) f = f a
+</code></pre>
+<p>This definition confirms the intuition that missing values are propagated through a do notation block.</p>
+<p>Let's see how the <code>Bind</code> type class is related to do notation. Consider a simple do notation block which starts by binding a value from the result of some computation:</p>
+<pre><code class="language-haskell">do value &lt;- someComputation
+   whatToDoNext
+</code></pre>
+<p>Every time the PureScript compiler sees this pattern, it replaces the code with this:</p>
+<pre><code class="language-haskell">bind someComputation \value -&gt; whatToDoNext
+</code></pre>
+<p>or, written infix:</p>
+<pre><code class="language-haskell">someComputation &gt;&gt;= \value -&gt; whatToDoNext
+</code></pre>
+<p>The computation <code>whatToDoNext</code> is allowed to depend on <code>value</code>.</p>
+<p>If there are multiple binds involved, this rule is applied multiple times, starting from the top. For example, the <code>userCity</code> example that we saw earlier gets desugared as follows:</p>
+<pre><code class="language-haskell">userCity :: XML -&gt; Maybe XML
+userCity root =
+  child root &quot;profile&quot; &gt;&gt;= \prof -&gt;
+    child prof &quot;address&quot; &gt;&gt;= \addr -&gt;
+      child addr &quot;city&quot; &gt;&gt;= \city -&gt;
+        pure city
+</code></pre>
+<p>It is worth noting that code expressed using do notation is often much clearer than the equivalent code using the <code>&gt;&gt;=</code> operator. However, writing binds explicitly using <code>&gt;&gt;=</code> can often lead to opportunities to write code in <em>point-free</em> form - but the usual warnings about readability apply.</p>
+<h2><a class="header" href="#monad-laws" id="monad-laws">Monad Laws</a></h2>
+<p>The <code>Monad</code> type class comes equipped with three laws, called the <em>monad laws</em>. These tell us what we can expect from sensible implementations of the <code>Monad</code> type class.</p>
+<p>It is simplest to explain these laws using do notation.</p>
+<h3><a class="header" href="#identity-laws" id="identity-laws">Identity Laws</a></h3>
+<p>The <em>right-identity</em> law is the simplest of the three laws. It tells us that we can eliminate a call to <code>pure</code> if it is the last expression in a do notation block:</p>
+<pre><code class="language-haskell">do
+  x &lt;- expr
+  pure x
+</code></pre>
+<p>The right-identity law says that this is equivalent to just <code>expr</code>.</p>
+<p>The <em>left-identity</em> law states that we can eliminate a call to <code>pure</code> if it is the first expression in a do notation block:</p>
+<pre><code class="language-haskell">do
+  x &lt;- pure y
+  next
+</code></pre>
+<p>This code is equivalent to <code>next</code>, after the name <code>x</code> has been replaced with the expression <code>y</code>.</p>
+<p>The last law is the <em>associativity law</em>. It tells us how to deal with nested do notation blocks. It states that the following piece of code:</p>
+<pre><code class="language-haskell">c1 = do
+  y &lt;- do
+    x &lt;- m1
+    m2
+  m3
+</code></pre>
+<p>is equivalent to this code:</p>
+<pre><code class="language-haskell">c2 = do
+  x &lt;- m1
+  y &lt;- m2
+  m3
+</code></pre>
+<p>Each of these computations involves three monadic expression <code>m1</code>, <code>m2</code> and <code>m3</code>. In each case, the result of <code>m1</code> is eventually bound to the name <code>x</code>, and the result of <code>m2</code> is bound to the name <code>y</code>.</p>
+<p>In <code>c1</code>, the two expressions <code>m1</code> and <code>m2</code> are grouped into their own do notation block.</p>
+<p>In <code>c2</code>, all three expressions <code>m1</code>, <code>m2</code> and <code>m3</code> appear in the same do notation block.</p>
+<p>The associativity law tells us that it is safe to simplify nested do notation blocks in this way.</p>
+<p><em>Note</em> that by the definition of how do notation gets desugared into calls to <code>bind</code>, both of <code>c1</code> and <code>c2</code> are also equivalent to this code:</p>
+<pre><code class="language-haskell">c3 = do
+  x &lt;- m1
+  do
+    y &lt;- m2
+    m3
+</code></pre>
+<h2><a class="header" href="#folding-with-monads" id="folding-with-monads">Folding With Monads</a></h2>
+<p>As an example of working with monads abstractly, this section will present a function which works with any type constructor in the <code>Monad</code> type class. This should serve to solidify the intuition that monadic code corresponds to programming &quot;in a larger language&quot; with side-effects, and also illustrate the generality which programming with monads brings.</p>
+<p>The function we will write is called <code>foldM</code>. It generalizes the <code>foldl</code> function that we met earlier to a monadic context. Here is its type signature:</p>
+<pre><code class="language-haskell">foldM :: forall m a b
+       . Monad m
+      =&gt; (a -&gt; b -&gt; m a)
+      -&gt; a
+      -&gt; List b
+      -&gt; m a
+</code></pre>
+<p>Notice that this is the same as the type of <code>foldl</code>, except for the appearance of the monad <code>m</code>:</p>
+<pre><code class="language-haskell">foldl :: forall a b
+       . (a -&gt; b -&gt; a)
+      -&gt; a
+      -&gt; List b
+      -&gt; a
+</code></pre>
+<p>Intuitively, <code>foldM</code> performs a fold over a list in some context supporting some set of side-effects.</p>
+<p>For example, if we picked <code>m</code> to be <code>Maybe</code>, then our fold would be allowed to fail by returning <code>Nothing</code> at any stage - every step returns an optional result, and the result of the fold is therefore also optional.</p>
+<p>If we picked <code>m</code> to be the <code>Array</code> type constructor, then every step of the fold would be allowed to return zero or more results, and the fold would proceed to the next step independently for each result. At the end, the set of results would consist of all folds over all possible paths. This corresponds to a traversal of a graph!</p>
+<p>To write <code>foldM</code>, we can simply break the input list into cases.</p>
+<p>If the list is empty, then to produce the result of type <code>a</code>, we only have one option: we have to return the second argument:</p>
+<pre><code class="language-haskell">foldM _ a Nil = pure a
+</code></pre>
+<p>Note that we have to use <code>pure</code> to lift <code>a</code> into the monad <code>m</code>.</p>
+<p>What if the list is non-empty? In that case, we have a value of type <code>a</code>, a value of type <code>b</code>, and a function of type <code>a -&gt; b -&gt; m a</code>. If we apply the function, we obtain a monadic result of type <code>m a</code>. We can bind the result of this computation with a backwards arrow <code>&lt;-</code>.</p>
+<p>It only remains to recurse on the tail of the list. The implementation is simple:</p>
+<pre><code class="language-haskell">foldM f a (b : bs) = do
+  a' &lt;- f a b
+  foldM f a' bs
+</code></pre>
+<p>Note that this implementation is almost identical to that of <code>foldl</code> on lists, with the exception of do notation.</p>
+<p>We can define and test this function in PSCi. Here is an example - suppose we defined a &quot;safe division&quot; function on integers, which tested for division by zero and used the <code>Maybe</code> type constructor to indicate failure:</p>
+<pre><code class="language-haskell">safeDivide :: Int -&gt; Int -&gt; Maybe Int
+safeDivide _ 0 = Nothing
+safeDivide a b = Just (a / b)
+</code></pre>
+<p>Then we can use <code>foldM</code> to express iterated safe division:</p>
+<pre><code class="language-text">&gt; import Data.List
+
+&gt; foldM safeDivide 100 (fromFoldable [5, 2, 2])
+(Just 5)
+
+&gt; foldM safeDivide 100 (fromFoldable [2, 0, 4])
+Nothing
+</code></pre>
+<p>The <code>foldM safeDivide</code> function returns <code>Nothing</code> if a division by zero was attempted at any point. Otherwise it returns the result of repeatedly dividing the accumulator, wrapped in the <code>Just</code> constructor.</p>
+<h2><a class="header" href="#monads-and-applicatives" id="monads-and-applicatives">Monads and Applicatives</a></h2>
+<p>Every instance of the <code>Monad</code> type class is also an instance of the <code>Applicative</code> type class, by virtue of the superclass relationship between the two classes.</p>
+<p>However, there is also an implementation of the <code>Applicative</code> type class which comes &quot;for free&quot; for any instance of <code>Monad</code>, given by the <code>ap</code> function:</p>
+<pre><code class="language-haskell">ap :: forall m a b. Monad m =&gt; m (a -&gt; b) -&gt; m a -&gt; m b
+ap mf ma = do
+  f &lt;- mf
+  a &lt;- ma
+  pure (f a)
+</code></pre>
+<p>If <code>m</code> is a law-abiding member of the <code>Monad</code> type class, then there is a valid <code>Applicative</code> instance for <code>m</code> given by <code>ap</code>.</p>
+<p>The interested reader can check that <code>ap</code> agrees with <code>apply</code> for the monads we have already encountered: <code>Array</code>, <code>Maybe</code> and <code>Either e</code>.</p>
+<p>If every monad is also an applicative functor, then we should be able to apply our intuition for applicative functors to every monad. In particular, we can reasonably expect a monad to correspond, in some sense, to programming &quot;in a larger language&quot; augmented with some set of additional side-effects. We should be able to lift functions of arbitrary arities, using <code>map</code> and <code>apply</code>, into this new language.</p>
+<p>But monads allow us to do more than we could do with just applicative functors, and the key difference is highlighted by the syntax of do notation. Consider the <code>userCity</code> example again, in which we looked for a user's city in an XML document which encoded their user profile:</p>
+<pre><code class="language-haskell">userCity :: XML -&gt; Maybe XML
+userCity root = do
+  prof &lt;- child root &quot;profile&quot;
+  addr &lt;- child prof &quot;address&quot;
+  city &lt;- child addr &quot;city&quot;
+  pure city
+</code></pre>
+<p>Do notation allows the second computation to depend on the result <code>prof</code> of the first, and the third computation to depend on the result <code>addr</code> of the second, and so on. This dependence on previous values is not possible using only the interface of the <code>Applicative</code> type class.</p>
+<p>Try writing <code>userCity</code> using only <code>pure</code> and <code>apply</code>: you will see that it is impossible. Applicative functors only allow us to lift function arguments which are independent of each other, but monads allow us to write computations which involve more interesting data dependencies.</p>
+<p>In the last chapter, we saw that the <code>Applicative</code> type class can be used to express parallelism. This was precisely because the function arguments being lifted were independent of one another. Since the <code>Monad</code> type class allows computations to depend on the results of previous computations, the same does not apply - a monad has to combine its side-effects in sequence.</p>
+<h2><a class="header" href="#exercises" id="exercises">Exercises</a></h2>
+<ol>
+<li>
+<p>(Easy) Look up the types of the <code>head</code> and <code>tail</code> functions from the <code>Data.Array</code> module in the <code>arrays</code> package. Use do notation with the <code>Maybe</code> monad to combine these functions into a function <code>third</code> which returns the third element of an array with three or more elements. Your function should return an appropriate <code>Maybe</code> type.</p>
+</li>
+<li>
+<p>(Medium) Write a function <code>sums</code> which uses <code>foldM</code> to determine all possible totals that could be made using a set of coins. The coins will be specified as an array which contains the value of each coin. Your function should have the following result:</p>
+<pre><code class="language-text">&gt; sums []
+[0]
+
+&gt; sums [1, 2, 10]
+[0,1,2,3,10,11,12,13]
+</code></pre>
+<p><em>Hint</em>: This function can be written as a one-liner using <code>foldM</code>. You might want to use the <code>nub</code> and <code>sort</code> functions to remove duplicates and sort the result respectively.</p>
+</li>
+<li>
+<p>(Medium) Confirm that the <code>ap</code> function and the <code>apply</code> operator agree for the <code>Maybe</code> monad.</p>
+</li>
+<li>
+<p>(Medium) Verify that the monad laws hold for the <code>Monad</code> instance for the <code>Maybe</code> type, as defined in the <code>maybe</code> package.</p>
+</li>
+<li>
+<p>(Medium) Write a function <code>filterM</code> which generalizes the <code>filter</code> function on lists. Your function should have the following type signature:</p>
+<pre><code class="language-haskell">filterM :: forall m a. Monad m =&gt; (a -&gt; m Boolean) -&gt; List a -&gt; m (List a)
+</code></pre>
+<p>Test your function in PSCi using the <code>Maybe</code> and <code>Array</code> monads.</p>
+</li>
+<li>
+<p>(Difficult) Every monad has a default <code>Functor</code> instance given by:</p>
+<pre><code class="language-haskell">map f a = do
+  x &lt;- a
+  pure (f x)
+</code></pre>
+<p>Use the monad laws to prove that for any monad, the following holds:</p>
+<pre><code class="language-haskell">lift2 f (pure a) (pure b) = pure (f a b)
+</code></pre>
+<p>where the <code>Applicative</code> instance uses the <code>ap</code> function defined above. Recall that <code>lift2</code> was defined as follows:</p>
+<pre><code class="language-haskell">lift2 :: forall f a b c. Applicative f =&gt; (a -&gt; b -&gt; c) -&gt; f a -&gt; f b -&gt; f c
+lift2 f a b = f &lt;$&gt; a &lt;*&gt; b
+</code></pre>
+</li>
+</ol>
+<h2><a class="header" href="#native-effects" id="native-effects">Native Effects</a></h2>
+<p>We will now look at one particular monad which is of central importance in PureScript - the <code>Effect</code> monad.</p>
+<p>The <code>Effect</code> monad is defined in the <code>Effect</code> module. It is used to manage so-called <em>native</em> side-effects. If you are familiar with Haskell, it is the equivalent of the <code>IO</code> monad.</p>
+<p>What are native side-effects? They are the side-effects which distinguish JavaScript expressions from idiomatic PureScript expressions, which typically are free from side-effects. Some examples of native effects are:</p>
+<ul>
+<li>Console IO</li>
+<li>Random number generation</li>
+<li>Exceptions</li>
+<li>Reading/writing mutable state</li>
+</ul>
+<p>And in the browser:</p>
+<ul>
+<li>DOM manipulation</li>
+<li>XMLHttpRequest / AJAX calls</li>
+<li>Interacting with a websocket</li>
+<li>Writing/reading to/from local storage</li>
+</ul>
+<p>We have already seen plenty of examples of &quot;non-native&quot; side-effects:</p>
+<ul>
+<li>Optional values, as represented by the <code>Maybe</code> data type</li>
+<li>Errors, as represented by the <code>Either</code> data type</li>
+<li>Multi-functions, as represented by arrays or lists</li>
+</ul>
+<p>Note that the distinction is subtle. It is true, for example, that an error message is a possible side-effect of a JavaScript expression, in the form of an exception. In that sense, exceptions do represent native side-effects, and it is possible to represent them using <code>Effect</code>. However, error messages implemented using <code>Either</code> are not a side-effect of the JavaScript runtime, and so it is not appropriate to implement error messages in that style using <code>Effect</code>. So it is not the effect itself which is native, but rather how it is implemented at runtime.</p>
+<h2><a class="header" href="#side-effects-and-purity" id="side-effects-and-purity">Side-Effects and Purity</a></h2>
+<p>In a pure language like PureScript, one question which presents itself is: without side-effects, how can one write useful real-world code?</p>
+<p>The answer is that PureScript does not aim to eliminate side-effects. It aims to represent side-effects in such a way that pure computations can be distinguished from computations with side-effects in the type system. In this sense, the language is still pure.</p>
+<p>Values with side-effects have different types from pure values. As such, it is not possible to pass a side-effecting argument to a function, for example, and have side-effects performed unexpectedly.</p>
+<p>The only way in which side-effects managed by the <code>Effect</code> monad will be presented is to run a computation of type <code>Effect a</code> from JavaScript.</p>
+<p>The Spago build tool (and other tools) provide a shortcut, by generating additional JavaScript to invoke the <code>main</code> computation when the application starts. <code>main</code> is required to be a computation in the <code>Effect</code> monad.</p>
+<h2><a class="header" href="#the-effect-monad" id="the-effect-monad">The Effect Monad</a></h2>
+<p>The goal of the <code>Effect</code> monad is to provide a well-typed API for computations with side-effects, while at the same time generating efficient JavaScript. </p>
+<p>Here is an example. It uses the <code>random</code> package, which defines functions for generating random numbers:</p>
+<pre><code class="language-haskell">module Main where
+
+import Prelude
+
+import Effect (Effect)
+import Effect.Random (random)
+import Effect.Console (logShow)
+
+main :: Effect Unit
+main = do
+  n &lt;- random
+  logShow n
+
+</code></pre>
+<p>If this file is saved as <code>src/Main.purs</code>, then it can be compiled and run using Spago:</p>
+<pre><code class="language-text">$ spago run
+</code></pre>
+<p>Running this command, you will see a randomly chosen number between <code>0</code> and <code>1</code> printed to the console.</p>
+<p>This program uses do notation to combine two native effects provided by the JavaScript runtime: random number generation and console IO.</p>
+<p>As mentioned previously, the <code>Effect</code> monad is of central importance to PureScript. The reason why it's central is because it is the conventional way to interoperate with PureScript's <code>Foreign Function Interface</code>, which provides the mechanism to execute a program and perform side effects. While it's desireable to avoid using the <code>Foreign Function Interface</code>, it's fairly critical to understand how it works and how to use it, so I recommend reading that chapter before doing any serious PureScript work. That said, the <code>Effect</code> monad is fairly simple. It has a few helper functions, but aside from that it doesn't do much except encapsulate side effects. </p>
+<h2><a class="header" href="#the-aff-monad" id="the-aff-monad">The Aff Monad</a></h2>
+<p>The <code>Aff</code> monad is an asynchronous effect monad and threading model for PureScipt. </p>
+<p>Asynchrony is typically achieved in JavaScript with callbacks, for example: </p>
+<pre><code class="language-javascript">function asyncFunction(onSuccess, onError){ ... }
+</code></pre>
+<p>The same thing can be modeled with the <code>Effect</code> monad: </p>
+<pre><code class="language-haskell">asyncFunction :: forall success error. (success -&gt; Effect Unit) -&gt; (error -&gt; Effect Unit) -&gt; Effect Unit 
+asyncFunction onSuccess onError = ...
+</code></pre>
+<p>But as is true in JavaScript, this can quickly get out of hand and result in &quot;callback hell&quot;. </p>
+<p>The <code>Aff</code> monad solves this problem similar to how <code>Promise</code> solves it in JavaScript, and there is a great library called <code>aff-promise</code> that provides interop with JavaScript <code>Promise</code>.</p>
+<h2><a class="header" href="#effect-to-aff-and-aff-to-effect" id="effect-to-aff-and-aff-to-effect">Effect to Aff and Aff to Effect</a></h2>
+<p>Any synchronous <code>Effect</code> can by lifted into an asynchronous <code>Aff</code> with <code>liftEffect</code>. Similarly, any <code>Aff</code> can be converted to an <code>Effect Unit</code> with <code>launchAff_</code>. Below is the code that prints a random number in terms of <code>Aff</code>, written in a few different styles:</p>
+<pre><code class="language-haskell">module Main where
+
+import Prelude
+
+import Effect (Effect)
+import Effect.Aff (Aff, launchAff_)
+import Effect.Class (liftEffect)
+import Effect.Console (logShow)
+import Effect.Random (random)
+
+printRandomStyle1a :: Aff Unit
+printRandomStyle1a = liftEffect doRandom
+  where
+    doRandom :: Effect Unit
+    doRandom = do 
+      n &lt;- random
+      logShow n
+
+printRandomStyle1b :: Aff Unit
+printRandomStyle1b = liftEffect $ do
+  n &lt;- random
+  logShow n
+
+printRandomStyle2 :: Aff Unit
+printRandomStyle2 = do
+  n &lt;- liftEffect random
+  liftEffect $ logShow n
+
+printRandomStyle3 :: Aff Unit
+printRandomStyle3 = do
+  n &lt;- random # liftEffect
+  (logShow n) # liftEffect
+
+
+main :: Effect Unit
+main = launchAff_  do
+  printRandomStyle1a
+  printRandomStyle1b
+  printRandomStyle2
+  printRandomStyle3
+
+</code></pre>
+<p><code>printRandomStyle1a</code> and <code>printRandomStyle1b</code> are nearly the same, but the types more explicit in <code>printRandomStyle1a</code> to add additional clarity. In both, the <code>do</code> block results in something with type <code>Effect Unit</code> and is lifted to <code>Aff</code> outside of the <code>do</code> block. In <code>printRandomStyle2</code>, both <code>random</code> and <code>logShow</code> are lifted to <code>Aff</code> inside the <code>do</code> block, which results in an <code>Aff</code>. Often while writing PureScript, you'll encounter cases where <code>Aff</code> and <code>Effect</code> need to be mixed, so style 2 is the more common case. Finally in <code>printRandomStyle3</code>, the <code>liftEffect</code> function has been moved to the right with <code>#</code>, which applies an argument to a function instead of the regular function call with arguments. The purpose of this style is to make the intent of the statement more clear by moving the <em>boilerplate</em> out of the way to the right. </p>
+<h1><a class="header" href="#launchaff_-vs-launchaff" id="launchaff_-vs-launchaff">launchAff_ vs launchAff</a></h1>
+<p><code>Aff</code> has two similar functions for converting from an <code>Aff</code> to an <code>Effect</code>: </p>
+<pre><code class="language-haskell">launchAff_ :: forall a. Aff a -&gt; Effect Unit
+</code></pre>
+<pre><code class="language-haskell">launchAff :: forall a. Aff a -&gt; Effect (Fiber a)
+</code></pre>
+<p><code>launchAff</code> gives back a <code>Fiber</code> wrapped in an <code>Effect</code>. A <code>Fiber</code> is a <em>forked</em> computation that can be <em>joined</em> back into an <code>Aff</code>. You can read more about <code>Fiber</code> in Pursuit, PureScript's library and documentation hub. The important thing to note is that there is no direct way to get the contained value in an <code>Aff</code> once it's been converted to an <code>Effect</code>. For this reason it makes sense to write most of your program in terms of <code>Aff</code> instead of <code>Effect</code> if you intend to perform asynchronous effects. This may sound limiting, but in practice it is not. Your programs are typically started in the <code>main</code> function by wiring up event handlers and listeners, which typically results in a <code>Unit</code> and can be run with <code>launchAff_</code>. </p>
+<h1><a class="header" href="#monaderror" id="monaderror">MonadError</a></h1>
+<p><code>Aff</code> has an instance of <code>MonadError</code>, a type class for clean error handling. <code>MonadError</code> is covered in more detail in the <em>Monadic Adventures</em> chapter, so below is just a motivating example. </p>
+<p>Imagine you wished to write a <code>quickCheckout</code> function by combining several preexisting functions. Without utilizing <code>MonadError</code> the code might look like the following:</p>
+<pre><code class="language-haskell">module Main where
+
+import Prelude
+
+import Data.Either (Either(..))
+import Effect.Aff (Aff, throwError)
+import Effect.Exception (Error)
+
+data UserInfo = UserInfo
+data User = User
+data Item = Item
+data Receipt = Receipt
+data Basket = Basket
+
+registerUser :: UserInfo -&gt; Aff (Either Error User)
+registerUser user = pure $ Right User
+
+createBasket :: User -&gt; Aff (Either Error Basket)
+createBasket user = pure $ Right Basket
+
+addItemToBasket :: Item -&gt; Basket -&gt; Aff (Either Error Basket)
+addItemToBasket item basket = pure $ Right basket
+
+purchaseBasket :: User -&gt; Basket -&gt; Aff (Either Error Receipt)
+purchaseBasket user basket = pure $ Right Receipt
+
+quickCheckout :: Item -&gt; UserInfo -&gt; Aff (Either Error Receipt)
+quickCheckout item userInfo = do
+  eitherRegister &lt;- registerUser userInfo
+  case eitherRegister of
+    Left error -&gt; pure $ Left error
+    Right user -&gt; do
+      eitherBasket &lt;- createBasket user
+      case eitherBasket of
+        Left error -&gt; pure $ Left error
+        Right basket -&gt; do
+          eitherItemInBasket &lt;- addItemToBasket item basket
+          case eitherItemInBasket of
+            Left error -&gt; pure $ Left error
+            Right itemInBasket -&gt; purchaseBasket user itemInBasket
+
+</code></pre>
+<p>All of the data types and functions (aside from <code>quickCheckout</code>) are stubs, and meant to be ignored aside from their types. Note that <code>quickCheckout</code> is pretty ugly and the error checking is deeply nested. This is because there is a monad (<code>Either</code>) inside of a monad (<code>Aff</code>). Monads don't nicely compose so, we've got to step down into each <code>Aff</code> and check each <code>Either</code>. It's a bit annoying. This is where <code>MonadError</code> can help. </p>
+<p>Take a look at the alternate implementation below.</p>
+<pre><code class="language-haskell">module Main where
+
+import Prelude
+
+import Data.Either (Either(..))
+import Effect (Effect)
+import Effect.Aff (Aff, launchAff_, throwError, try)
+import Effect.Class (liftEffect)
+import Effect.Console (log)
+import Effect.Exception (Error)
+
+data UserInfo = UserInfo
+data User = User
+data Item = Item
+data Receipt = Receipt
+data Basket = Basket
+
+registerUser :: UserInfo -&gt; Aff (Either Error User)
+registerUser user = pure $ Right User
+
+createBasket :: User -&gt; Aff (Either Error Basket)
+createBasket user = pure $ Right Basket
+
+addItemToBasket :: Item -&gt; Basket -&gt; Aff (Either Error Basket)
+addItemToBasket item basket = pure $ Right basket
+
+purchaseBasket :: User -&gt; Basket -&gt; Aff (Either Error Receipt)
+purchaseBasket user basket = pure $ Right Receipt
+
+rethrow :: forall a. Aff (Either Error a) -&gt; Aff a
+rethrow aff = do
+  either &lt;- aff
+  case either of
+    Left error -&gt; throwError error
+    Right a -&gt; pure a
+
+quickCheckout :: Item -&gt; UserInfo -&gt; Aff Receipt
+quickCheckout item userInfo = do
+  user &lt;- registerUser userInfo # rethrow
+  basket &lt;- createBasket user # rethrow
+  itemInBasket &lt;- addItemToBasket item basket # rethrow
+  purchaseBasket user itemInBasket # rethrow
+
+main :: Effect Unit
+main = launchAff_ do
+  either &lt;- try $ quickCheckout Item UserInfo
+  case either of
+    Left error -&gt; log &quot;There was an error checking out!&quot; # liftEffect
+    Right _ -&gt; log &quot;Checkout Successful&quot; # liftEffect
+
+</code></pre>
+<p>Note here that <code>quickCheckout</code> is much cleaner and the intent of the code is much clearer. This is made possible by the <code>rethrow</code> function, which uses <code>throwError</code> from <code>MonadError</code> to <em>eliminate</em> the <code>Either</code> type. Your next question might be, &quot;but what happens to the error?&quot;. Notice in the <code>main</code> function, <code>try</code> is called on the result of <code>quickCheckout</code>. <code>try</code> will catch the error thrown by <code>throwError</code> - if one is thrown - and wrap the result in an <code>Either</code>, so you can handle it from there. If one doesn't use <code>try</code> as is done in the <code>main</code> function, then a runtime exception will be thrown. Because you can't really know if upstream code has made use of <code>MonadError</code> it's a good idea to call <code>try</code> on an <code>Aff</code> before converting it into an <code>Effect</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="chapter7.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="chapter9.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="chapter7.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="chapter9.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+        
+        
+        <script type="text/javascript">
+            window.playpen_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>
