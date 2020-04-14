@@ -2,6 +2,8 @@
 
 ## Functional JavaScript
 
+Testing 123
+
 Functional programming techniques have been making appearances in JavaScript for some time now:
 
 - Libraries such as [UnderscoreJS](https://underscorejs.org) allow the developer to leverage tried-and-trusted functions such as `map`, `filter` and `reduce` to create larger programs from smaller programs by composition:
