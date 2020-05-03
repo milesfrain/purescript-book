@@ -2,26 +2,24 @@
 
 ## Chapter Goals
 
-This chapter will introduce PureScript's _foreign function interface_ (or _FFI_), which enables communication from PureScript code to JavaScript code, and vice versa. We will cover the following:
+This chapter will introduce PureScript's _foreign function interface_ (or _FFI_), which enables communication from PureScript code to JavaScript code, and vice versa. We will cover how to:
 
-- How to call pure JavaScript functions from PureScript,
-- How to create new effect types and actions for use with the `Effect` monad, based on existing JavaScript code,
-- How to call PureScript code from JavaScript,
-- How to understand the representation of PureScript values at runtime,
-- How to work with untyped data using the `foreign` package.
+- Call pure and effectful JavaScript functions from PureScript.
+- Call PureScript functions from JavaScript.
+- Understand the representation of PureScript values at runtime.
+- Work with untyped data using the `foreign` package.
+- Encode and parse JSON
 
 Towards the end of this chapter, we will revisit our recurring address book example. The goal of the chapter will be to add the following new functionality to our application using the FFI:
 
-- Alerting the user with a popup notification,
-- Storing the serialized form data in the browser's local storage, and reloading it when the application restarts.
+- Alert the user with a popup notification.
+- Store the serialized form data in the browser's local storage, and reload it when the application restarts.
 
 ## Project Setup
 
 The source code for this module is a continuation of the source code from chapters 3, 7 and 8. As such, the source tree includes the appropriate source files from those chapters.
 
 This chapter intruduces the `foreign-generic` library as a dependency. This library adds support for _datatype generic programming_ to the `foreign` library. The `foreign` library is a sub-dependency and provides a data type and functions for working with _untyped data_.
-
-_Note_: to avoid browser-specific issues with local storage when the webpage is served from a local file, it might be necessary to run this chapter's project over HTTP.
 
 ## A Disclaimer
 
@@ -221,6 +219,8 @@ A full discussion of _parametric polymorphism_ and _parametricity_ is beyond the
 
 ## Representing Constrained Types
 
+Todo - Remove this section as described in https://github.com/purescript/documentation/issues/273
+
 Functions with a type class constraint have an interesting representation at runtime. Because the behavior of the function might depend on the type class instance chosen by the compiler, the function is given an additional argument, called a _type class dictionary_, which contains the implementation of the type class functions provided by the chosen instance.
 
 For example, here is a simple PureScript function with a constrained type which uses the `Show` type class:
@@ -405,6 +405,8 @@ isEmpty = isUndefined <<< head
 
 Here, the foreign functions we defined were very simple, which meant that we were able to benefit from the use of PureScript's typechecker as much as possible. This is good practice in general: foreign functions should be kept as small as possible, and application logic moved into PureScript code wherever possible.
 
+Todo - Would be good to describe how to write maybeHead.
+
 ## Functions of Multiple Arguments
 
 PureScript's Prelude contains an interesting set of examples of foreign types. As we have covered already, PureScript's function types only take a single argument, and can be used to simulate functions of multiple arguments via _currying_. This has certain advantages - we can partially apply functions, and give type class instances for function types - but it comes with a performance penalty. For performance critical code, it is sometimes necessary to define genuine JavaScript functions which accept multiple arguments. The Prelude defines foreign types which allow us to work safely with such functions.
@@ -462,7 +464,7 @@ var curriedAdd = function (n) {
 
 ## Representing Side Effects
 
-The `Effect` monad is also defined as a foreign type. Its runtime representation is quite simple - an expression of type `Effect a` should evaluate to a JavaScript function of no arguments, which performs any side-effects and returns a value with the correct runtime representation for type `a`.
+The `Effect` monad is also defined as a foreign type. Its runtime representation is quite simple - an expression of type `Effect a` should evaluate to a JavaScript function of **no arguments**, which performs any side-effects and returns a value with the correct runtime representation for type `a`.
 
 The definition of the `Effect` type constructor is given in the `Effect` module as follows:
 
@@ -691,6 +693,8 @@ The `foreign-generic` library tells us where in the JSON document the type error
 
 Real-world JSON documents contain null and undefined values, so we need to be able to handle those too. `foreign-generic` solves this problem with the 'Maybe' type constructor to represent missing values.
 
+Todo - the content about NullOrUndefined versus Maybe seems good to include from original
+
 ```text
 > import Prelude
 > import Foreign.NullOrUndefined
@@ -710,6 +714,9 @@ The type `Maybe Int` represents values which are either integers, or null. What 
 ```
 
 ## Generic JSON Serialization
+
+Todo - should add another section on SimpleJSON. Perhaps convert address-book to use that.
+
 
 In fact, we rarely need to write instances for the `Decode` class, since the `foreign-generic` class allows us to _derive_ instances using a technique called _datatype-generic programming_. A full explanation of this technique is beyond the scope of this book, but it allows us to write functions once, and reuse them over many different data types, based on the structure of a the types themselves.
 
@@ -734,6 +741,7 @@ In fact, we can also derive an _encoder_ in the same way:
 instance encodeFormData :: Encode FormData where
   encode = genericEncode (defaultOptions { unwrapSingleConstructors = true })
 ```
+Todo - probably don't need generic show for this if it's a record.
 
 And even an instance of Show which comes in handy for logging the result:
 
