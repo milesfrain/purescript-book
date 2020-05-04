@@ -266,6 +266,8 @@ shout(require('Data.Show').showNumber)(42);
 The simplest way to use JavaScript code from PureScript is to give a type to an existing JavaScript value using a _foreign import_ declaration. Foreign import
 declarations should have a corresponding JavaScript declaration in a _foreign JavaScript module_.
 
+Todo - the calculate interest example is better. Encode URI is already part of globals. Also scales better to multiple args.
+
 For example, consider the `encodeURIComponent` function, which can be used from JavaScript to encode a component of a URI by escaping special characters:
 
 ```text
@@ -314,13 +316,35 @@ $ spago repl
 
 This approach works well for simple JavaScript values, but is of limited use for more complicated examples. The reason is that most idiomatic JavaScript code does not meet the strict criteria imposed by the runtime representations of the basic PureScript types. In those cases, we have another option - we can _wrap_ the JavaScript code in such a way that we can force it to adhere to the correct runtime representation.
 
+# Todo - can multiple arguments section go here?
+
+should pick an even better example
+
+square
+
+pow(num, exp)
+
+powCurryWrap = runFn2 pow
+
+powCurryNest
+
+powCurryArrow
+
+
+
+
+
+# Todo - discuss currying and ES6 here, also babel, lebab.
+
 ## Wrapping JavaScript Values
 
 We might want to wrap JavaScript values and functions for a number of reasons:
 
-- A function takes multiple arguments, but we want to call it like a curried function.
+- A function takes multiple arguments, but we want to call it like a curried function. Todo - how does this work with previous section?
 - We might want to use the `Effect` monad to keep track of any JavaScript side-effects.
 - It might be necessary to handle corner cases like `null` or `undefined`, to give a function the correct runtime representation.
+
+Todo - should figure out a better example for this.
 
 For example, suppose we wanted to recreate the `head` function on arrays by using a foreign declaration. In JavaScript, we might write the function as follows:
 
@@ -351,6 +375,8 @@ exports.unsafeHead = function(arr) {
 ```
 
 ## Defining Foreign Types
+
+Todo - will later show how to return Maybe, but need to cover multiple arguments first.
 
 Throwing an exception in the case of failure is less than ideal - idiomatic PureScript code uses the type system to represent side-effects such as missing values. One example of this approach is the `Maybe` type constructor. In this section, we will build another solution using the FFI.
 
@@ -405,9 +431,14 @@ isEmpty = isUndefined <<< head
 
 Here, the foreign functions we defined were very simple, which meant that we were able to benefit from the use of PureScript's typechecker as much as possible. This is good practice in general: foreign functions should be kept as small as possible, and application logic moved into PureScript code wherever possible.
 
-Todo - Would be good to describe how to write maybeHead.
+Todo - Would be good to describe how to write maybeHead - after multiple args section.
+
+Todo - Move multiple arguments section earlier.
 
 ## Functions of Multiple Arguments
+
+
+
 
 PureScript's Prelude contains an interesting set of examples of foreign types. As we have covered already, PureScript's function types only take a single argument, and can be used to simulate functions of multiple arguments via _currying_. This has certain advantages - we can partially apply functions, and give type class instances for function types - but it comes with a performance penalty. For performance critical code, it is sometimes necessary to define genuine JavaScript functions which accept multiple arguments. The Prelude defines foreign types which allow us to work safely with such functions.
 
@@ -494,6 +525,8 @@ foreign import log :: String -> Effect Unit
 
 And here is its definition:
 
+Todo - show ES6 version, followed by ES5 and note about compatibility for libraries.
+
 ```javascript
 exports.log = function (s) {
   return function () {
@@ -512,17 +545,19 @@ require('Main').main();
 
 When using `spago bundle-app --to` or `spago run`, this call to `main` is generated automatically, whenever the `Main` module is defined.
 
-## Defining New Effects
+## Calling Effectful JavaScript from PureScript
 
-The source code for this chapter defines two new effects. The simplest is `alert`, defined in the `Effect.Alert` module. It is used to indicate that a computation might alert the user using a popup window.
+The source code for this chapter defines two new effectful functions. The simplest is `alert`, defined in the `Effect.Alert` module. It is used to indicate that a computation might alert the user using a popup window.
 
-The effect is defined using a foreign type declaration:
+The function is defined using a foreign type declaration:
 
 ```haskell
 foreign import alert :: String -> Effect Unit
 ```
 
 The foreign JavaScript module is straightforward, defining the `alert` function by assigning it to the `exports` variable:
+
+Todo - ES6
 
 ```javascript
 "use strict";
@@ -538,9 +573,9 @@ The `alert` action is very similar to the `log` action from the `Effect.Console`
 
 Note that, as in the case of `log`, the `alert` function uses a function of no arguments to represent the computation of type `Effect Unit`.
 
-The second effect defined in this chapter is the `Storage` effect, which is defined in the `Effect.Storage` module. It is used to indicate that a computation might read or write values using the Web Storage API.
-
-The `Effect.Storage` module defines two actions: `getItem`, which retrieves a value from local storage, and `setItem` which inserts or updates a value in local storage. The two functions have the following types:
+The `Effect.Storage` module defines two more effectful functions which use the Web Storage API:
+- `getItem` retrieves a value from local storage
+- `setItem` inserts or updates a value in local storage.
 
 ```haskell
 foreign import getItem :: String -> Effect Foreign
@@ -549,6 +584,8 @@ foreign import setItem :: String -> String -> Effect Unit
 ```
 
 Here is the corresponding JavaScript implementation of these functions in `Effect/Storage.js`:
+
+Todo ES6
 
 ```js
 exports.setItem = function(key) {
@@ -611,16 +648,25 @@ npm i -g lebab
 lebab --replace output/ --transform arrow,arrow-return
 ```
 
+Todo include this with note about Babel
+
  ## Exercises
 
  1. (Medium) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Effect.Alert` module.
  1. (Medium) Write a wrapper for the `removeItem` method on the `localStorage` object, and add your foreign function to the `Effect.Storage` module.
 
+## Simple JSON
+
+This should be a short and sweet section on adding feature to Address Book.
+
+
+Todo - Rewrite next sections as Advanced JSON, or something.
+
 ## Working With Untyped Data
 
 In this section, we will see how we can use the `Foreign` library to turn untyped data into typed data, with the correct runtime representation for its type.
 
-The code for this chapter demonstrates how a record can be serialized to JSON and stored in / retrieved from local storage.
+The code for this chapter demonstrates how a record can be serialized to JSON and then stored in and retrieved from local storage.
 
 The `Main` module defines a type for the saved form data:
 
