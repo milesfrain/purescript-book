@@ -78,7 +78,7 @@ $ spago repl
 
 We can also define our own functions in foreign modules. Here's an example of how to create and call a custom JavaScript function that squares a `Number`:
 
-`src/Data/Calculate.js`:
+`src/Test/Calculate.js`:
 ```js
 "use strict";
 
@@ -87,9 +87,9 @@ exports.square = function(n) {
 };
 ```
 
-`src/Data/Calculate.purs`:
+`src/Test/Calculate.purs`:
 ```hs
-module Data.Calculate where
+module Test.Calculate where
 
 foreign import square :: Number -> Number
 ```
@@ -97,7 +97,7 @@ foreign import square :: Number -> Number
 ```text
 $ spago repl
 
-> import Data.Calculate
+> import Test.Calculate
 > square 5.0
 25.0
 ```
@@ -128,7 +128,8 @@ foreign import diagonal :: Fn2 Number Number Number
 ```text
 $ spago repl
 
-> import Data.Calculate
+> import Test.Calculate
+> import Data.Function.Uncurried
 > runFn2 diagonal 3.0 4.0
 5.0
 ```
@@ -146,7 +147,8 @@ exports.diagonalNested = function(w) {
 or equivalently with arrow functions (see ES6 note below):
 
 ```js
-exports.diagonalArrow = w => h => Math.sqrt(w * w + h * h);
+exports.diagonalArrow = w => h =>
+  Math.sqrt(w * w + h * h);
 ```
 
 ```hs
@@ -157,7 +159,7 @@ foreign import diagonalArrow  :: Number -> Number -> Number
 ```text
 $ spago repl
 
-> import Data.Calculate
+> import Test.Calculate
 > diagonalNested 3.0 4.0
 5.0
 > diagonalArrow 3.0 4.0
@@ -189,7 +191,11 @@ uncurriedAdd = mkFn2 \n m -> m + n
 
 and we can apply a function of two arguments by using the `runFn2` function:
 
-```haskell
+```text
+$ spago repl
+
+> import Test.Calculate
+> import Data.Function.Uncurried
 > runFn2 uncurriedAdd 3 10
 13
 ```
@@ -236,23 +242,25 @@ lebab --replace output/ --transform arrow,arrow-return
 
 This operation would convert the above `curriedAdd` function to:
 ```js
-var curriedAdd = n => m => m + n | 0;
+var curriedAdd = n => m =>
+  m + n | 0;
 ```
 
 The remaining examples in this book will use arrow functions instead of nested functions.
 
 ## Exercises
-1. (Medium) Write a JavaScript function `volumeFn` in the `Data.Calculate` module that finds the volume of a box. Use an `Fn` wrapper from `Data.Function.Uncurried`.
+1. (Medium) Write a JavaScript function `volumeFn` in the `Test.Calculate` module that finds the volume of a box. Use an `Fn` wrapper from `Data.Function.Uncurried`.
 2. (Medium) Rewrite `volumeFn` with arrow functions as `volumeArrow`.
 
 ## Beyond Simple Types
 
+We have seen examples of how to send and receive primitive types, such as `String` and `Number`, over FFI. Now we'll cover how to use some of the other types available in PureScript, like `Maybe`.
+
 Suppose we wanted to recreate the `head` function on arrays by using a foreign declaration. In JavaScript, we might write the function as follows:
 
 ```javascript
-exports.head = function(arr) {
-  return arr[0];
-}
+exports.head = arr =>
+  arr[0];
 ```
 
 However, there is a problem with this function. We might try to give it the type `forall a. Array a -> a`, but for empty arrays, this function returns `undefined`. Therefore, this function does not have the correct runtime representation.
@@ -261,7 +269,7 @@ We can instead return a `Maybe` value to handle this corner case.
 
 It is tempting to write the following:
 ```js
-exports.maybeHead = function(arr) {
+exports.maybeHead = arr => {
   if (arr.length) {
     return Data_Maybe.Just.create(arr[0]);
   } else {
@@ -279,13 +287,13 @@ But calling these `Maybe` constructors directly in the FFI code isn't recommende
 The recommended approach is to add extra parameters to your FFI-defined function to accept the functions you need to call as arguments:
 
 ```js
-exports.maybeHeadImpl = function(just, nothing, arr) {
+exports.maybeHeadImpl = just => nothing => arr => {
   if (arr.length) {
     return just(arr[0]);
   } else {
     return nothing;
   }
-}
+};
 ```
 
 ```hs
@@ -315,19 +323,238 @@ This vulnerability is allowed because `(\_ -> Just 1000)` and `Just 1000` match 
 In the more secure type signature, even when `a` is determined to be `Int` based on the input array, we still need to provide valid functions matching the signatures involving `forall x`.
 The *only* option for `(forall x. Maybe x)` is `Nothing`, since a `Just` would assume a type for `x` and then no longer be valid for all `x`. The only options for `(forall x. x -> Maybe x)` are `Just` (our desired argument) and `(\_ -> Nothing)`, which is the only remaining vulnerability.
 
+Todo - Questioning whether the above distinction is necessary. The vulnerability is really just if there's a mistake in the adjacent wrapper, and the suggested approach doesn't eliminate all vulnerabilities. The suggested approach can't be applied to most other wrapping strategies, either.
+
 ## Defining Foreign Types
 
 Suppose instead of returning a `Maybe a`, we wanted to return a new type `Undefined a` whose representation at runtime was like that for the type `a`, but also allowing the `undefined` value.
 
-head
-maybeHead
-undefinedHead
-unsafeHead
+We can define a _foreign type_ using the FFI using a _foreign type declaration_. The syntax is similar to defining a foreign function:
 
-Recall that PureScript shares three primitive types with JavaScript: `Number`, `String`, and `Boolean`.
+```haskell
+foreign import data Undefined :: Type -> Type
+```
 
-## Foreign Types
+Note that the `data` keyword here indicates that we are defining a type, not a value. Instead of a type signature, we give the _kind_ of the new type. In this case, we declare the kind of `Undefined` to be `Type -> Type`. In other words, `Undefined` is a type constructor.
+
+We can now simply reuse our original definition for `head`:
+
+```javascript
+exports.undefinedHead = arr =>
+  arr[0];
+```
+
+And in the PureScript module:
+
+```haskell
+foreign import undefinedHead :: forall a. Array a -> Undefined a
+```
+
+The body of the `undefinedHead` function returns `arr[0]` even if that value is undefined, and the type signature reflects the fact that our function can return an undefined value.
+
+This function has the correct runtime representation for its type, but is quite useless since we have no way to use a value of type `Undefined a`. But we can fix that by writing some new functions using the FFI!
+
+The most basic function we need will tell us whether a value is defined or not:
+
+```haskell
+foreign import isUndefined :: forall a. Undefined a -> Boolean
+```
+
+This is easily defined in our foreign JavaScript module as follows:
+
+```javascript
+exports.isUndefined = value =>
+  value === undefined;
+```
+
+We can now use `isUndefined` and `undefinedHead` together from PureScript to define a useful function:
+
+```haskell
+isEmpty :: forall a. Array a -> Boolean
+isEmpty = isUndefined <<< undefinedHead
+```
+
+Here, the foreign function we defined is very simple, which means we can benefit from the use of PureScript's typechecker as much as possible. This is good practice in general: foreign functions should be kept as small as possible, and application logic moved into PureScript code wherever possible.
+
+## Exceptions
+
+Another option is to simply throw an exception in the case of an empty array. Strictly speaking, pure functions should not throw exceptions, but we have the flexibility to do so. We indicate the lack of safety in the function name:
+
+```haskell
+foreign import unsafeHead :: forall a. Array a -> a
+```
+
+In our foreign JavaScript module, we can define `unsafeHead` as follows:
+
+```javascript
+exports.unsafeHead = arr => {
+  if (arr.length) {
+    return arr[0];
+  } else {
+    throw new Error('unsafeHead: empty array');
+  }
+};
+```
+
+
+## Exercises
+1. (Hard) Write a JavaScript function `quadraticRootsImpl` and a wrapper `quadraticRoots :: Number -> Number -> Number -> Pair (Complex Number)` in the `Test.Calculate` module that uses the quadratic formula to find the roots of the polynomial `a*x^2 + b*x + c` when provided with the coefficients `a`, `b`, `c`. Return the two roots as a `Pair` of `Complex` `Number`s. *Hint:* Use the `quadraticRoots` wrapper to pass constructors for `Pair` and `Complex` to `quadraticRootsImpl`.
+
+Todo - sort pair for test
+
+## Using Type Class Member Functions
+
+Just like our earlier guide on passing the `Maybe` constructor over FFI, this is another case of writing PureScript that calls JavaScript which in turn calls PureScript functions again. Here we will explore how to pass type class member functions over the FFI.
+
+Todo - these should be in `Test.Display`.
+
+Here is one way to give JavaScript access PureScript's `show` so that the foreign code has a way to generate a `String` from any `Show`able types.
+
+We start with writing a foreign JavaScript function which expects the appropriate instance of `show` to match the type of `x`.
+
+```js
+exports.boldImpl = show => x =>
+  show(x).toUpperCase() + "!!!";
+```
+
+Then we write the matching signature:
+```hs
+foreign import boldImpl :: forall a. (a -> String) -> a -> String
+```
+
+and a wrapper function that passes the correct instance of `show`:
+```hs
+boldWrap :: forall a. Show a => a -> String
+boldWrap x = boldImpl show x
+```
+
+We can then call the wrapper:
+```text
+$ spago repl
+
+> import Test.Display
+> import Data.Tuple
+> boldWrap (Tuple 1 "Hat")
+"(TUPLE 1 \"HAT\")!!!"
+```
+
+Another option is to include the type class constraint (`Show a =>`) in the foreign signature, rather than only in the wrapping function.
+
+```hs
+foreign import boldConstraint :: forall a. Show a => a -> String
+```
+
+This type class constraint results in another argument (`Show` in this case) passed to the corresponding JavaScript function:
+```js
+exports.boldConstraint = Show => x =>
+  Show.show(x).toUpperCase() + "!!!";
+```
+
+The `Show` parameter is a javascript object that contains all of the type class member functions for the `Show` constraint. Each member function (just `show` in this case), is specialized for the constrained type `a`. In other words, the compiler will select the functions defined in the type class instance of the type that `a` happens to be.
+
+We can then avoid a wrapper and call the foreign function directly:
+```text
+$ spago repl
+
+> import Test.Display
+> import Data.Tuple
+> boldConstraint (Tuple 1 "Hat")
+"(TUPLE 1 \"HAT\")!!!"
+```
+
+Todo - is this approach more likely to break with dead-code elimination? If a type class constraint is declared, will member functions for the discovered types be preserved, or must these member functions actually be used in the function?
+
+Here's another example demonstrating multiple constraints:
+
+```js
+exports.showEquality = Eq => Show => a => b => {
+  if (Eq.eq(a)(b)) {
+    return "Equivalent";
+  } else {
+    return Show.show(a) + " is not equal to " + Show.show(b);
+  }
+}
+```
+
+```hs
+foreign import showEquality :: forall a. Eq a => Show a => a -> a -> String
+```
+
+```text
+$ spago repl
+
+> import Test.Display
+> import Data.Maybe
+> showEquality Nothing (Just 5)
+"Nothing is not equal to (Just 5)"
+```
 
 ## Effectful Functions
 
+Let's extend our `boldConstraint` function to log to the console. Logging is an `Effect` and `Effect`s are represented in JavaScript as a function of zero arguments, `()` with arrow notation:
+
+```js
+exports.yell = Show => x => () =>
+  console.log(Show.show(x).toUpperCase() + "!!!");
+```
+
+The new foreign import is the same as before, except that the return type changed from `String` to `Effect Unit`.
+```hs
+foreign import yell :: forall a. Show a => a -> Effect Unit
+```
+
+When testing this in the repl, notice that string is printed directly to the console (instead of being quoted) and a `unit` value is returned.
+
+```text
+$ spago repl
+
+> import Test.Display
+> import Data.Tuple
+> yell (Tuple 1 "Hat")
+(TUPLE 1 "HAT")!!!
+unit
+```
+
+There are also `EffectFn` wrappers from `Effect.Uncurried`. These are similar to the similar to the `Fn` wrappers from `Data.Function.Uncurried` that we've already seen. These wrappers let you call uncurried effectful functions in PureScript.
+
+You'd generally only use these if you want to call existing JavaScript library APIs directly, rather than wrapping those APIs in curried functions. So it doesn't make much sense to present an example of uncurried `yell` where the JavaScript relies on PureScript type class members, since you wouldn't find that in the existing JavaScript ecosystem.
+
+Todo - is it even possible to grab constraint args with runFn? Maybe this should be a note in the Constraint section.
+
+Instead, we'll modify our previous `diagonal` example to include logging in addition to returning the result:
+
+```js
+exports.diagonalLog = function(w, h) {
+  let result = Math.sqrt(w * w + h * h);
+  console.log("Diagonal is " + result);
+  return result;
+};
+```
+
+```hs
+foreign import diagonalLog :: EffectFn2 Number Number Number
+```
+
+```text
+$ spago repl
+
+> import Test.Calculate
+> import Effect.Uncurried
+> runEffectFn2 diagonalLog 3.0 4.0
+Diagonal is 5
+5.0
+```
+
+## Asynchronous Functions
+
+Use promise
+
+## Passing JSON
+
+## Simple JSON
+
+## Calling PureScript from JavaScript
+runtime representations too.
+
+## Address book
 

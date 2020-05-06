@@ -34,7 +34,7 @@ instance showFormData :: Show FormData where
   show = genericShow
 
 loadSavedData :: Effect (Maybe FormData)
-loadSavedData = do 
+loadSavedData = do
   item <- getItem "person"
 
   let
@@ -54,6 +54,7 @@ main = void do
                      , lastName: "Wayne"
                      }
 
+  alert "FFI5"
   log "Storing data into local storage"
   setItem "person" $ encodeJSON rec
   log "Loading data from local storage"
