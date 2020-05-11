@@ -5,6 +5,7 @@ import Prelude
 import Control.Promise (Promise)
 import Data.Function.Uncurried (Fn2, mkFn2)
 import Data.Maybe (Maybe(..))
+import Effect (Effect)
 import Effect.Uncurried (EffectFn2)
 
 foreign import square :: Number -> Number
@@ -42,6 +43,21 @@ isEmpty = isUndefined <<< undefinedHead
 foreign import unsafeHead :: forall a. Array a -> a
 
 
+-- todo Complex
+
+
+
+
 foreign import diagonalLog :: EffectFn2 Number Number Number
 
 foreign import sleep :: Int -> Promise Unit
+
+foreign import diagonalAsync :: Number -> Number -> Promise Number
+
+foreign import diagonalAsyncEffect :: Number -> Number -> Effect (Promise Number)
+
+type QuadRec = {a :: Number, b :: Number, c :: Number}
+
+foreign import showQuadRec :: QuadRec -> Int
+
+foreign import sh :: forall a. a -> Int

@@ -52,9 +52,30 @@ exports.diagonalLog = function(w, h) {
 exports.sleep = ms =>
   new Promise(resolve => setTimeout(resolve, ms));
 
+exports.diagonalAsync = w => async h => {
+  await exports.sleep(300);
+  return Math.sqrt(w * w + h * h);
+};
+
 /*
-exports.diagonalAsync = w => h => async () => {
-  await exports.sleep(1000);
+// Foreign syntax error with this for some reason
+exports.diagonalAsyncEffect = w => h => async () => {
+  await exports.sleep(300);
   return Math.sqrt(w * w + h * h);
 };
 */
+
+exports.diagonalAsyncEffect = w => h => async function() {
+  await exports.sleep(300);
+  return Math.sqrt(w * w + h * h);
+};
+
+exports.showQuadRec = r => {
+  console.log(r);
+  return 5;
+};
+
+exports.sh = x => {
+  console.log(x);
+  return 5;
+};

@@ -547,14 +547,150 @@ Diagonal is 5
 
 ## Asynchronous Functions
 
-Use promise
+Promises in JavaScript translate directly to asynchronous effects in PureScript with the help of the `Control.Promise` module.
+
+Take this `sleep` `Promise` as an example:
+```js
+exports.sleep = ms =>
+  new Promise(resolve => setTimeout(resolve, ms));
+```
+
+It delays execution for `ms` milliseconds, and is represented by this PureScript signature:
+```hs
+foreign import sleep :: Int -> Promise Unit
+```
+
+We can then convert this `Promise` to an `Aff` with `toAff`.
+
+```text
+$ spago repl
+
+> import Prelude
+> import Test.Calculate
+> import Control.Promise
+> import Effect.Class.Console
+> import Effect.Aff
+> :pa
+… launchAff_ do
+…   log "waiting"
+…   toAff $ sleep 300
+…   log "done waiting"
+
+waiting
+unit
+done waiting
+```
+
+Note that asynchronous logging in the repl just waits to print until the entire block has finished executing. This code behaves more predictably when run with `spago test` where there is a slight delay *between* prints.
+
+PureScript's `Promise` type also represents `async`/`await` functions, which are just syntactic sugar for promises. Here we use the `async` keyword for the last parameter:
+
+```js
+exports.diagonalAsync = w => async h => {
+  await exports.sleep(300);
+  return Math.sqrt(w * w + h * h);
+};
+```
+
+Since we're returning a `Number` we represent this type in the `Promise`:
+
+```hs
+foreign import diagonalAsync :: Number -> Number -> Promise Number
+```
+
+```text
+$ spago repl
+
+import Prelude
+import Test.Calculate
+import Control.Promise
+import Effect.Class.Console
+import Effect.Aff
+> :pa
+… launchAff_ do
+…   res <- toAff $ diagonalAsync 3.0 4.0
+…   logShow res
+…
+unit
+5.0
+```
+
+We can also wrap `Promise` with `Effect`:
+
+```hs
+foreign import diagonalAsyncEffect :: Number -> Number -> Effect (Promise Number)
+```
+
+The corresponding JavaScript needs to return a function of zero arguments to represent the `Effect`:
+
+```js
+exports.diagonalAsyncEffect = w => h => async function() {
+  await exports.sleep(300);
+  return Math.sqrt(w * w + h * h);
+};
+```
+
+And `toAffE` is used instead of `toAff` to convert to an `Aff`:
+```text
+$ spago repl
+
+import Prelude
+import Test.Calculate
+import Control.Promise
+import Effect.Class.Console
+import Effect.Aff
+> :pa
+… launchAff_ do
+…   res <- toAffE $ diagonalAsyncEffect 3.0 4.0
+…   logShow res
+…
+unit
+5.0
+```
+
+Todo - why doesn't arrow syntax work with async effect?
 
 ## Passing JSON
-
 ## Simple JSON
+
+Just do a really simple example.
+
+Map with pair to string?
+
+Note all of these convert to the same JSON representation:
+Set, Array, Tuple, Pair
+
+"To encode JSON, you must decide on a way to represent your data using only primitive JSON types (strings, numbers, booleans, arrays, objects, or null).
+
+
+Should probably just do a send two complex records, then receive a complex record.
+
+
+Bonus challenge could be to receive a record with coefficients. Actually, can't go the other way.
+
+Could do something with a set or map.
+
+
+
+Combined. Just use Simple JSON, but think of some good examples.
+Actually, Argonaut seems to work better.
+
+What to pass to JS?
+
+What to get from JS?
+
+Map? Set? Pair of Complex?
+
+rewrite quadratic which takes a record of coefficients, a, b, c.
+Can you just pass a record?  Or must it be represented as JSON?
+
+
+Todo - SimpleJSON docs need some minor updates.
 
 ## Calling PureScript from JavaScript
 runtime representations too.
+Move these to end - What should this section be called:
+Additional Content, Addendum?
 
 ## Address book
 

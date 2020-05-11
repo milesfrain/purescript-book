@@ -664,6 +664,8 @@ Todo - Rewrite next sections as Advanced JSON, or something.
 
 ## Working With Untyped Data
 
+Todo - Yes, Just use SimpleJSON for this, and then move this section to the end of the book. Maybe an addendum section. Note that while these sections are still accurate, they may not be as applicaple to common use cases or describe the most straightforward techniques available today.
+
 In this section, we will see how we can use the `Foreign` library to turn untyped data into typed data, with the correct runtime representation for its type.
 
 The code for this chapter demonstrates how a record can be serialized to JSON and then stored in and retrieved from local storage.
@@ -739,7 +741,7 @@ The `foreign-generic` library tells us where in the JSON document the type error
 
 Real-world JSON documents contain null and undefined values, so we need to be able to handle those too. `foreign-generic` solves this problem with the 'Maybe' type constructor to represent missing values.
 
-Todo - the content about NullOrUndefined versus Maybe seems good to include from original
+Todo - the content about NullOrUndefined versus Maybe seems good to include from original. Seems like Maybe is a type constructor from NullOrUndefined. Is this the same Maybe?
 
 ```text
 > import Prelude
@@ -759,12 +761,14 @@ The type `Maybe Int` represents values which are either integers, or null. What 
 (Right [(Just 1),(Just 2),Nothing])
 ```
 
+Todo - should newtype decoding be covered? Seems like above was edited to strip that out and just use underlying Maybe. Is this section too low-level?
+
 ## Generic JSON Serialization
 
 Todo - should add another section on SimpleJSON. Perhaps convert address-book to use that.
 
 
-In fact, we rarely need to write instances for the `Decode` class, since the `foreign-generic` class allows us to _derive_ instances using a technique called _datatype-generic programming_. A full explanation of this technique is beyond the scope of this book, but it allows us to write functions once, and reuse them over many different data types, based on the structure of a the types themselves.
+In fact, we rarely need to write instances for the `Decode` class, since the `foreign-generic` class allows us to _derive_ instances using a technique called _datatype-generic programming_. A full explanation of this technique is beyond the scope of this book, but it allows us to write functions once, and reuse them over many different data types, based on the structure of the types themselves.
 
 To derive a `Decode` instance for our `FormData` type (so that we may deserialize it from its JSON representation), we first use the `derive` keyword to derive an instance of the `Generic` type class, which looks like this:
 
