@@ -7,6 +7,7 @@ You can edit this file as you like.
   [ "aff-promise"
   , "argonaut"
   , "console"
+  , "debug"
   , "effect"
   , "foreign-generic"
   , "pairs"

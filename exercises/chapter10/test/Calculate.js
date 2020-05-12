@@ -19,6 +19,24 @@ exports.diagonalArrow = w => h =>
   Math.sqrt(w * w + h * h);
 
 
+exports.cumulativeSums = arr => {
+  let sum = 0
+  let sums = []
+  arr.forEach(x => {
+    sum += x;
+    sums.push(sum);
+  });
+  return sums;
+};
+
+
+exports.addComplex = a => b => {
+  return {
+    real: a.real + b.real,
+    imag: a.imag + b.imag
+  }
+};
+
 exports.maybeHeadImpl = just => nothing => arr => {
   if (arr.length) {
     return just(arr[0]);
@@ -40,6 +58,13 @@ exports.unsafeHead = arr => {
     throw new Error('unsafeHead: empty array');
   }
 };
+
+
+exports.quadraticRootsImpl = mkPair => a => b => c =>
+  mkPair({real:1, imag:2})({real:3, imag:4});
+
+
+exports.myArr = arr => [1, 2, 3.2, 'c']
 
 
 exports.diagonalLog = function(w, h) {
@@ -78,4 +103,49 @@ exports.showQuadRec = r => {
 exports.sh = x => {
   console.log(x);
   return 5;
+};
+
+
+exports.cumulativeSumsBroken = arr => {
+  let sum = 0
+  let sums = []
+  arr.forEach(x => {
+    sum += x;
+    sums.push(sum);
+  });
+  sums.push("Broken"); // Bug
+  return sums;
+};
+
+
+exports.addComplexBroken = a => b => {
+  return {
+    real: a.real + b.real,
+    broken: a.imag + b.imag // Bug
+  }
+};
+
+exports.cumulativeSumsJson = exports.cumulativeSumsBroken
+// Try the non-broken version too
+//exports.cumulativeSumsJson = exports.cumulativeSums
+
+exports.addComplexJson = exports.addComplexBroken
+// Try the non-broken version too
+//exports.addComplexJson = exports.addComplex
+
+exports.mapSetFooJson = j => {
+  let m = new Map(j);
+  m.set("Foo", 42);
+  return Array.from(m);
+};
+
+/*
+exports.mapSetFooJson = m =>
+  Array.from((new Map(m)).set("Foo", 42));
+*/
+
+exports.valuesOfMapJson = j => {
+  let m = new Map(j);
+  let s = new Set(m.values())
+  return Array.from(s);
 };
