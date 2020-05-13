@@ -1,9 +1,9 @@
 module Main where
 
 import Prelude
-import Data.AddressBook (PhoneNumber, examplePerson)
+import Data.AddressBook (PhoneNumber, Person, examplePerson)
 import Data.AddressBook.Validation (Errors, validatePerson')
-import Data.Argonaut (encodeJson, stringify)
+import Data.Argonaut (decodeJson, encodeJson, jsonParser, stringify)
 import Data.Array (length, mapWithIndex, updateAt)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -11,7 +11,7 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Console (log)
 import Effect.Exception (throw)
-import Effect.Storage (setItem)
+import Effect.Storage (getItem, setItem)
 import React.Basic.DOM as D
 import React.Basic.DOM.Events (targetValue)
 import React.Basic.Events (handler, handler_)
@@ -71,14 +71,14 @@ formField name placeholder value setValue =
         ]
     }
 
-mkAddressBookApp :: Effect (ReactComponent {})
+mkAddressBookApp :: Effect (ReactComponent { initialPerson :: Person })
 mkAddressBookApp =
   -- incoming \props are unused
   component "AddressBookApp" \props -> R.do
     -- `useState` takes a default initial value and returns the
     -- current value and a way to update the value.
     -- Consult react-hooks docs for a more detailed explanation of `useState`.
-    Tuple person setPerson <- useState examplePerson
+    Tuple person setPerson <- useState props.initialPerson
     let
       errors = case validatePerson' person of
         Left e -> e
@@ -168,8 +168,30 @@ main = do
     Just c -> do
       -- Create AddressBook react component
       addressBookApp <- mkAddressBookApp
+      -- Retrieve person from local storage
+      item <- getItem "person"
+      initialPerson <- case decodeJson item of
+        Left e1 -> do
+          log $ "No string decoded: " <> e1
+          log "Returning examplePerson"
+          pure examplePerson
+        Right (jsonString :: String) -> do
+          log $ "Got json string: " <> show jsonString
+          case jsonParser jsonString of
+            Left e2 -> do
+              log $ "Parsing error " <> e2
+              log "Returning examplePerson"
+              pure examplePerson
+            Right j -> case decodeJson j of
+              Left e3 -> do
+                log $ "Decoding error " <> e3
+                log "Returning examplePerson"
+                pure examplePerson
+              Right (p :: Person) -> do
+                log $ "Got person " <> show p
+                pure p
       let
         -- Create JSX node from react component. Pass-in empty props
-        app = element addressBookApp {}
+        app = element addressBookApp { initialPerson }
       -- Render AddressBook JSX node in DOM "container" element
       D.render app c
