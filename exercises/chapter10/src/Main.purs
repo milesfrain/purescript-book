@@ -3,12 +3,15 @@ module Main where
 import Prelude
 import Data.AddressBook (PhoneNumber, Person, examplePerson)
 import Data.AddressBook.Validation (Errors, validatePerson')
-import Data.Argonaut (decodeJson, encodeJson, jsonParser, stringify)
+import Data.Argonaut (Json, decodeJson, encodeJson, jsonParser, stringify)
 import Data.Array (length, mapWithIndex, updateAt)
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
+import Effect.Alert (alert)
+import Effect.Class.Console (logShow)
 import Effect.Console (log)
 import Effect.Exception (throw)
 import Effect.Storage (getItem, setItem)
@@ -73,7 +76,6 @@ formField name placeholder value setValue =
 
 mkAddressBookApp :: Effect (ReactComponent { initialPerson :: Person })
 mkAddressBookApp =
-  -- incoming \props are unused
   component "AddressBookApp" \props -> R.do
     -- `useState` takes a default initial value and returns the
     -- current value and a way to update the value.
@@ -105,7 +107,7 @@ mkAddressBookApp =
       validateAndSave = do
         log "Running validators"
         case validatePerson' person of
-          Left errs -> log $ "There are " <> show (length errs) <> " validation errors."
+          Left errs -> alert $ "There are " <> show (length errs) <> " validation errors."
           Right validPerson -> do
             setItem "person" $ stringify $ encodeJson validPerson
             log "Saved"
@@ -153,6 +155,13 @@ mkAddressBookApp =
                 <> [ saveButton ]
           }
 
+processItem :: Json -> Either String Person
+processItem item = do
+  jsonString <- lmap ("No string in local storage: " <> _) $ decodeJson item
+  j <- lmap ("Cannot parse JSON string: " <> _) $ jsonParser jsonString
+  (p :: Person) <- lmap ("Cannot decode Person: " <> _) $ decodeJson j
+  pure p
+
 main :: Effect Unit
 main = do
   log "Rendering address book component"
@@ -170,28 +179,13 @@ main = do
       addressBookApp <- mkAddressBookApp
       -- Retrieve person from local storage
       item <- getItem "person"
-      initialPerson <- case decodeJson item of
-        Left e1 -> do
-          log $ "No string decoded: " <> e1
-          log "Returning examplePerson"
+      initialPerson <- case processItem item of
+        Left err -> do
+          alert $ "Error: " <> err <> ". Loading examplePerson"
           pure examplePerson
-        Right (jsonString :: String) -> do
-          log $ "Got json string: " <> show jsonString
-          case jsonParser jsonString of
-            Left e2 -> do
-              log $ "Parsing error " <> e2
-              log "Returning examplePerson"
-              pure examplePerson
-            Right j -> case decodeJson j of
-              Left e3 -> do
-                log $ "Decoding error " <> e3
-                log "Returning examplePerson"
-                pure examplePerson
-              Right (p :: Person) -> do
-                log $ "Got person " <> show p
-                pure p
+        Right p -> pure p
       let
-        -- Create JSX node from react component. Pass-in empty props
+        -- Create JSX node from react component.
         app = element addressBookApp { initialPerson }
       -- Render AddressBook JSX node in DOM "container" element
       D.render app c

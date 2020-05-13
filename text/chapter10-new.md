@@ -932,22 +932,16 @@ Todo - Address book should probably start with all chapter 8 exercises completed
 In this section we will apply our newly-acquired FFI and JSON knowledge to build on our address book example from chapter 8. We will add the following features:
 - A Save button at the bottom of the form that, when clicked, serializes the state of the form to JSON and saves it in local storage.
 - Automatic retrieval of the JSON document from local storage upon page reload. The form fields are populated with the contents of this document.
-- A pop-up alert if there is an issue interacting with local storage.
-
-setItem
-getItem
-alert
+- A pop-up alert if there is an issue saving or loading the form state.
 
 We'll start by creating FFI wrappers for the following Web Storage APIs in our `Effect.Storage` module:
 - `setItem` takes a key and a value (both strings), and returns a computation which stores (or updates) the value in local storage at the specified key.
-- `getItem` takes a key, and attempts to retrieve the associated value from local storage. However, since the `getItem` method on `window.localStorage` can return `null`, the return type is not `String`, but `Foreign`.
-
-Todo - Check if this should still be foreign. Are there better techniques?
+- `getItem` takes a key, and attempts to retrieve the associated value from local storage. However, since the `getItem` method on `window.localStorage` can return `null`, the return type is not `String`, but `Json`.
 
 ```haskell
 foreign import setItem :: String -> String -> Effect Unit
 
-foreign import getItem :: String -> Effect Foreign
+foreign import getItem :: String -> Effect Json
 ```
 
 Here is the corresponding JavaScript implementation of these functions in `Effect/Storage.js`:
@@ -1012,19 +1006,56 @@ instance decodeJsonPhoneType :: DecodeJson PhoneType where
 
 Now we can save our `person` to local storage, but this isn't very useful unless we can retrieve the data. We'll tackle that next.
 
-Todo - Pass either retrieved person or initialPerson in props
+We'll start with retrieving the "person" string from local storage:
+```hs
+item <- getItem "person"
+```
 
+Then we'll create a helper function to handle converting the string from local storage to our `Person` record. Note that this string in storage may be `null`, so we represent it as a foreign `Json` until it is successfully decoded as a `String`. There are a number of other conversion steps along the way - each of which return an `Either` value, so it makes sense to organize these together in a `do` block.
+```hs
+processItem :: Json -> Either String Person
+processItem item = do
+  jsonString <- decodeJson item
+  j <- jsonParser jsonString
+  (p :: Person) <- decodeJson j
+  pure p
+```
 
+Then we inspect this result to see if it succeeded. If it failed, we'll log the errors and use our default `examplePerson`, otherwise we'll use the person retrieved from local storage.
+```hs
+initialPerson <- case processItem item of
+  Left err -> do
+    log $ "Error: " <> err <> ". Loading examplePerson"
+    pure examplePerson
+  Right p -> pure p
+```
 
+Finally, we'll pass this `initialPerson` to our component via the `props` record:
+```hs
+-- Create JSX node from react component.
+app = element addressBookApp { initialPerson }
+```
 
-Json serialize our form state
+And pick it up on the other side to use in our state hook:
+```hs
+mkAddressBookApp :: Effect (ReactComponent { initialPerson :: Person })
+mkAddressBookApp =
+  component "AddressBookApp" \props -> R.do
+    Tuple person setPerson <- useState props.initialPerson
+```
 
-With getItem we need to parse the returned JSON
+As a finishing touch, we'll improve the quality of our error messages by appending to the `String` of each `Left` value with `lmap`.
+```hs
+processItem :: Json -> Either String Person
+processItem item = do
+  jsonString <- lmap ("No string in local storage: " <> _) $ decodeJson item
+  j <- lmap ("Cannot parse JSON string: " <> _) $ jsonParser jsonString
+  (p :: Person) <- lmap ("Cannot decode Person: " <> _) $ decodeJson j
+  pure p
+```
+Only the first error should ever occur during normal operation of this app. You can trigger the other errors by opening your web browser's dev tools, editing the saved "person" string in local storage, and refreshing the page. How you modify the JSON string determines which error is triggered. See if you can trigger each of them.
 
-Is kleisie compose what's needed for streamlined JSON parsing / decoding? >=>
-
-
-Next we'll implement the `alert` action, which is very similar to the `log` action from the `Effect.Console` module. The only difference is that the `alert` action uses the `window.alert` method, whereas the `log` action uses the `console.log` method. As such, `alert` can only be used in environments where `window.alert` is defined, such as a web browser.
+That covers local storage. Next we'll implement the `alert` action, which is very similar to the `log` action from the `Effect.Console` module. The only difference is that the `alert` action uses the `window.alert` method, whereas the `log` action uses the `console.log` method. As such, `alert` can only be used in environments where `window.alert` is defined, such as a web browser.
 
 ```hs
 foreign import alert :: String -> Effect Unit
@@ -1035,19 +1066,23 @@ exports.alert = msg => () =>
   window.alert(msg);
 ```
 
-We add it to our address book like so:
+We want this alert to appear when either:
+- A user attempts to save a form with validation errors.
+- The state cannot be retrieved from local storage.
 
-Todo
+That is accomplished by simply replacing `log` with `alert` on these lines:
+```hs
+Left errs -> alert $ "There are " <> show (length errs) <> " validation errors."
 
-
-
+alert $ "Error: " <> err <> ". Loading examplePerson"
+```
 
  ## Exercises
 
- 1. (Medium) Write a wrapper for the `removeItem` method on the `localStorage` object, and add your foreign function to the `Effect.Storage` module.
- 1. (Medium) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Effect.Alert` module.
-
-Todo - possible extensions in app: reset button and confirm popup. resets to example person.
+ 1. (Easy) Write a wrapper for the `removeItem` method on the `localStorage` object, and add your foreign function to the `Effect.Storage` module.
+ 1. (Medium) Add a "Reset" button that, when clicked, calls the newly-created `removeItem` function to delete the "person" entry from local storage.
+ 1. (Easy) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Effect.Alert` module.
+ 1. (Medium) Call this `confirm` function when a users clicks the "Reset" button to ask if they're sure they want to reset their address book.
 
 ## Addendum
 
@@ -1061,7 +1096,7 @@ https://functionalprogramming.slack.com/archives/C04NA444H/p1588600910356600
 https://functionalprogramming.slack.com/archives/C04NA444H/p1588610399361200
 
 Summary:
-Phil originally had a JS app with a pure PS core when he wrote the book, but that use case is less common today, and creating an "reverse ffi" module for effectful purescript seems outside the scope of this book.
+Phil originally had a JS app with a pure PS core when he wrote the book, but that use case is less common today, and creating a "reverse ffi" module for effectful purescript seems outside the scope of this book.
 
 This guide has some details on embedding effectful PS within a React JS app.
 https://thomashoneyman.com/articles/replace-react-components-with-purescript/#replacing-a-react-component-with-purescript-react
