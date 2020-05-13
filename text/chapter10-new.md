@@ -927,6 +927,8 @@ Todo - discuss null values - already covered in argonaut docs.
 
 ## Address book
 
+Todo - Address book should probably start with all chapter 8 exercises completed
+
 In this section we will apply our newly-acquired FFI and JSON knowledge to build on our address book example from chapter 8. We will add the following features:
 - A Save button at the bottom of the form that, when clicked, serializes the state of the form to JSON and saves it in local storage.
 - Automatic retrieval of the JSON document from local storage upon page reload. The form fields are populated with the contents of this document.
@@ -958,8 +960,63 @@ exports.getItem = key => () =>
   window.localStorage.getItem(key);
 ```
 
-Todo -
-We'll add the save button like so
+We'll create a save button like so:
+```hs
+saveButton :: R.JSX
+saveButton =
+  D.label
+    { className: "form-group row col-form-label"
+    , children:
+        [ D.button
+            { className: "btn-primary btn"
+            , onClick: handler_ validateAndSave
+            , children: [ D.text "Save" ]
+            }
+        ]
+    }
+```
+
+And write our validated `person` as a JSON string with `setItem` in the `validateAndSave` function:
+```hs
+validateAndSave :: Effect Unit
+validateAndSave = do
+  log "Running validators"
+  case validatePerson' person of
+    Left errs -> log $ "There are " <> show (length errs) <> " validation errors."
+    Right validPerson -> do
+      setItem "person" $ stringify $ encodeJson validPerson
+      log "Saved"
+```
+
+Note that if we attempt to compile at this stage, we'll encounter the following error:
+```text
+  No type class instance was found for
+    Data.Argonaut.Encode.Class.EncodeJson PhoneType
+```
+
+This is because `PhoneType` in the `Person` record needs an `EncodeJson` instance. We'll just derive a generic encode instance, and an encode instance too while we're at it. More information how this works is available in the argonaut docs:
+```hs
+import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
+import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
+import Data.Generic.Rep (class Generic)
+
+derive instance genericPhoneType :: Generic PhoneType _
+
+instance encodeJsonPhoneType :: EncodeJson PhoneType where
+  encodeJson = genericEncodeJson
+
+instance decodeJsonPhoneType :: DecodeJson PhoneType where
+  decodeJson = genericDecodeJson
+```
+
+Now we can save our `person` to local storage, but this isn't very useful unless we can retrieve the data. We'll tackle that next.
+
+Todo - Pass either retrieved person or initialPerson in props
+
+
+
+
 Json serialize our form state
 
 With getItem we need to parse the returned JSON
@@ -990,7 +1047,7 @@ Todo
  1. (Medium) Write a wrapper for the `removeItem` method on the `localStorage` object, and add your foreign function to the `Effect.Storage` module.
  1. (Medium) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Effect.Alert` module.
 
-Todo - possible extensions in app: clear button and confirm popup. For clear, is example person used, or is everything blank with validation errors?
+Todo - possible extensions in app: reset button and confirm popup. resets to example person.
 
 ## Addendum
 

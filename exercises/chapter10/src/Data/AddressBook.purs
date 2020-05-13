@@ -1,6 +1,10 @@
 module Data.AddressBook where
 
 import Prelude
+import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Argonaut.Encode.Generic.Rep (genericEncodeJson)
+import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
+import Data.Generic.Rep (class Generic)
 
 type Address
   = { street :: String
@@ -22,6 +26,14 @@ instance showPhoneType :: Show PhoneType where
   show WorkPhone = "WorkPhone"
   show CellPhone = "CellPhone"
   show OtherPhone = "OtherPhone"
+
+derive instance genericPhoneType :: Generic PhoneType _
+
+instance encodeJsonPhoneType :: EncodeJson PhoneType where
+  encodeJson = genericEncodeJson
+
+instance decodeJsonPhoneType :: DecodeJson PhoneType where
+  decodeJson = genericDecodeJson
 
 type PhoneNumber
   = { "type" :: PhoneType

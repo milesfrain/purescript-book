@@ -6,6 +6,7 @@ You can edit this file as you like.
 , dependencies =
   [ "aff-promise"
   , "argonaut"
+  , "argonaut-generic"
   , "console"
   , "debug"
   , "effect"
@@ -13,6 +14,7 @@ You can edit this file as you like.
   , "pairs"
   , "psci-support"
   , "random"
+  , "react-basic-hooks"
   , "simple-json"
   , "validation"
   ]

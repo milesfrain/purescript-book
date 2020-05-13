@@ -3,16 +3,18 @@ module Main where
 import Prelude
 import Data.AddressBook (PhoneNumber, examplePerson)
 import Data.AddressBook.Validation (Errors, validatePerson')
-import Data.Array (mapWithIndex, updateAt)
+import Data.Argonaut (encodeJson, stringify)
+import Data.Array (length, mapWithIndex, updateAt)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Console (log)
 import Effect.Exception (throw)
+import Effect.Storage (setItem)
 import React.Basic.DOM as D
 import React.Basic.DOM.Events (targetValue)
-import React.Basic.Events (handler)
+import React.Basic.Events (handler, handler_)
 import React.Basic.Hooks (ReactComponent, component, element, useState)
 import React.Basic.Hooks as R
 import Web.DOM.NonElementParentNode (getElementById)
@@ -71,7 +73,7 @@ formField name placeholder value setValue =
 
 mkAddressBookApp :: Effect (ReactComponent {})
 mkAddressBookApp =
-  -- incomming \props are unused
+  -- incoming \props are unused
   component "AddressBookApp" \props -> R.do
     -- `useState` takes a default initial value and returns the
     -- current value and a way to update the value.
@@ -98,6 +100,29 @@ mkAddressBookApp =
       -- helper-function to render all phone numbers
       renderPhoneNumbers :: Array R.JSX
       renderPhoneNumbers = mapWithIndex renderPhoneNumber person.phones
+
+      validateAndSave :: Effect Unit
+      validateAndSave = do
+        log "Running validators"
+        case validatePerson' person of
+          Left errs -> log $ "There are " <> show (length errs) <> " validation errors."
+          Right validPerson -> do
+            setItem "person" $ stringify $ encodeJson validPerson
+            log "Saved"
+
+      -- helper-function to render saveButton
+      saveButton :: R.JSX
+      saveButton =
+        D.label
+          { className: "form-group row col-form-label"
+          , children:
+              [ D.button
+                  { className: "btn-primary btn"
+                  , onClick: handler_ validateAndSave
+                  , children: [ D.text "Save" ]
+                  }
+              ]
+          }
     pure
       $ D.div
           { className: "container"
@@ -125,11 +150,13 @@ mkAddressBookApp =
                           ]
                       }
                   ]
+                <> [ saveButton ]
           }
 
 main :: Effect Unit
 main = do
   log "Rendering address book component"
+  --log $ stringify $ encodeJson examplePerson
   -- Get window object
   w <- window
   -- Get window's HTML document
