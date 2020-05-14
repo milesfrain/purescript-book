@@ -13,14 +13,3 @@ We might want to wrap JavaScript values and functions for a number of reasons:
 
 
 
-
-## Conclusion
-
-In this chapter, we've learned how to work with foreign JavaScript code from PureScript, and vice versa, and we've seen the issues involved with writing trustworthy code using the FFI:
-
-- We've seen the importance of the _runtime representation_ of data, and ensuring that foreign functions have the correct representation.
-- We learned how to deal with corner cases like null values and other types of JavaScript data, by using foreign types, or the `Foreign` data type.
-- We looked at some common foreign types defined in the Prelude, and how they can be used to interoperate with idiomatic JavaScript code. In particular, the representation of side-effects in the `Effect` monad was introduced, and we saw how to use the `Effect` monad to capture new side effects.
-- We saw how to safely deserialize JSON data using the `Decode` type class.
-
-For more examples, the `purescript`, `purescript-contrib` and `purescript-node` GitHub organizations provide plenty of examples of libraries which use the FFI. In the remaining chapters, we will see some of these libraries put to use to solve real-world problems in a type-safe way.

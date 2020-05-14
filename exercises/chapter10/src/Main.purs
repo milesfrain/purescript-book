@@ -165,7 +165,6 @@ processItem item = do
 main :: Effect Unit
 main = do
   log "Rendering address book component"
-  --log $ stringify $ encodeJson examplePerson
   -- Get window object
   w <- window
   -- Get window's HTML document

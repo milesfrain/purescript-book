@@ -1,15 +1,15 @@
 "use strict";
 
-exports.square = function(n) {
+exports.square = function (n) {
   return n * n;
 };
 
 
-exports.diagonal = function(w, h) {
+exports.diagonal = function (w, h) {
   return Math.sqrt(w * w + h * h);
 };
 
-exports.diagonalNested = function(w) {
+exports.diagonalNested = function (w) {
   return function (h) {
     return Math.sqrt(w * w + h * h);
   };
@@ -18,6 +18,7 @@ exports.diagonalNested = function(w) {
 exports.diagonalArrow = w => h =>
   Math.sqrt(w * w + h * h);
 
+// vetted
 
 exports.cumulativeSums = arr => {
   let sum = 0
@@ -60,14 +61,25 @@ exports.unsafeHead = arr => {
 };
 
 
-exports.quadraticRootsImpl = mkPair => a => b => c =>
-  mkPair({real:1, imag:2})({real:3, imag:4});
+exports.boldImpl = show => x =>
+  show(x).toUpperCase() + "!!!";
+
+exports.boldConstraint = Show => x =>
+  Show.show(x).toUpperCase() + "!!!";
+
+exports.showEquality = Eq => Show => a => b => {
+  if (Eq.eq(a)(b)) {
+    return "Equivalent";
+  } else {
+    return Show.show(a) + " is not equal to " + Show.show(b);
+  }
+}
+
+exports.yell = Show => x => () =>
+  console.log(Show.show(x).toUpperCase() + "!!!");
 
 
-exports.myArr = arr => [1, 2, 3.2, 'c']
-
-
-exports.diagonalLog = function(w, h) {
+exports.diagonalLog = function (w, h) {
   let result = Math.sqrt(w * w + h * h);
   console.log("Diagonal is " + result);
   return result;
@@ -77,32 +89,22 @@ exports.diagonalLog = function(w, h) {
 exports.sleep = ms =>
   new Promise(resolve => setTimeout(resolve, ms));
 
-exports.diagonalAsync = w => async h => {
-  await exports.sleep(300);
+exports.diagonalAsync = delay => w => async h => {
+  await exports.sleep(delay);
   return Math.sqrt(w * w + h * h);
 };
 
 /*
 // Foreign syntax error with this for some reason
-exports.diagonalAsyncEffect = w => h => async () => {
-  await exports.sleep(300);
+exports.diagonalAsyncEffect = delay => w => h => async () => {
+  await exports.sleep(delay);
   return Math.sqrt(w * w + h * h);
 };
 */
 
-exports.diagonalAsyncEffect = w => h => async function() {
-  await exports.sleep(300);
+exports.diagonalAsyncEffect = delay => w => h => async function () {
+  await exports.sleep(delay);
   return Math.sqrt(w * w + h * h);
-};
-
-exports.showQuadRec = r => {
-  console.log(r);
-  return 5;
-};
-
-exports.sh = x => {
-  console.log(x);
-  return 5;
 };
 
 
@@ -133,6 +135,7 @@ exports.addComplexJson = exports.addComplexBroken
 // Try the non-broken version too
 //exports.addComplexJson = exports.addComplex
 
+
 exports.mapSetFooJson = j => {
   let m = new Map(j);
   m.set("Foo", 42);
@@ -149,3 +152,14 @@ exports.valuesOfMapJson = j => {
   let s = new Set(m.values())
   return Array.from(s);
 };
+
+/*
+These versions always point to either the working or broken versions
+to enable automated testing.
+The examples accompanying the text are meant to be swapped
+between versions by the reader.
+*/
+exports.cumulativeSumsJsonBroken = exports.cumulativeSumsBroken
+exports.addComplexJsonBroken = exports.addComplexBroken
+exports.cumulativeSumsJsonWorking = exports.cumulativeSums
+exports.addComplexJsonWorking = exports.addComplex

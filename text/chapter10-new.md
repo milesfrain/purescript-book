@@ -5,15 +5,18 @@
 This chapter will introduce PureScript's _foreign function interface_ (or _FFI_), which enables communication from PureScript code to JavaScript code, and vice versa. We will cover how to:
 
 - Call pure and effectful JavaScript functions from PureScript.
-- Call PureScript functions from JavaScript.
-- Understand the representation of PureScript values at runtime.
-- Work with untyped data using the `foreign` package.
-- Encode and parse JSON
+- Work with untyped data.
+- Encode and parse JSON using the `argonaut` package.
 
 Towards the end of this chapter, we will revisit our recurring address book example. The goal of the chapter will be to add the following new functionality to our application using the FFI:
 
 - Alert the user with a popup notification.
 - Store the serialized form data in the browser's local storage, and reload it when the application restarts.
+
+There is also an addendum which covers some additional topics which are not as commonly sought-after. Feel free to read these sections, but don't let them stand in the way of progressing through the remainder of the book if they're less relevant to your learning objectives:
+
+- Understand the representation of PureScript values at runtime.
+- Call PureScript functions from JavaScript.
 
 ## Project Setup
 
@@ -21,8 +24,9 @@ The source code for this module is a continuation of the source code from chapte
 
 This chapter introduces the `argonaut` library as a dependency. This library is used for encoding and decoding JSON.
 
-Todo - Old
-This chapter introduces the `foreign-generic` library as a dependency. This library adds support for _datatype generic programming_ to the `foreign` library. The `foreign` library is a sub-dependency and provides a data type and functions for working with _untyped data_.
+The exercises for this chapter should be written in `test/Solutions.purs` and can be checked against the unit tests written in `test/Main.purs` by running `spago test`.
+
+The Address Book app can be launched with `parcel src/index.html --open`. It uses the same workflow from Chapter 8, so refer to that chapter for more detailed instructions.
 
 ## A Disclaimer
 
@@ -50,13 +54,12 @@ This function has the correct runtime representation for the function type `Stri
 We can assign this type to the function with the following foreign import declaration:
 
 ```haskell
-module Data.URI where
+module Test.URI where
 
 foreign import encodeURIComponent :: String -> String
 ```
 
-We also need to write a foreign JavaScript module. If the module above is saved as `src/Data/URI.purs`, then the foreign JavaScript module should be saved as
-`src/Data/URI.js`:
+We also need to write a foreign JavaScript module. If the module above is saved as `test/URI.purs`, then the foreign JavaScript module should be saved as `test/URI.js`:
 
 ```javascript
 "use strict";
@@ -64,10 +67,9 @@ We also need to write a foreign JavaScript module. If the module above is saved 
 exports.encodeURIComponent = encodeURIComponent;
 ```
 
-Spago will find `.js` files in the `src` directory, and provide them to the compiler as foreign JavaScript modules.
+Spago will find `.js` files in the `src` and `test` directories, and provide them to the compiler as foreign JavaScript modules.
 
-JavaScript functions and values are exported from foreign JavaScript modules by assigning them to the `exports` object just like a regular CommonJS module. The `purs` compiler treats this module like a regular CommonJS module, and simply adds it as a dependency to the compiled PureScript module. However, when bundling code for the browser with `psc-bundle` or `spago bundle-app --to`, it is very important to follow the pattern above, assigning exports to the `exports` object using a property assignment. This is because `psc-bundle` recognizes this format,
-allowing unused JavaScript exports to be removed from bundled code.
+JavaScript functions and values are exported from foreign JavaScript modules by assigning them to the `exports` object just like a regular CommonJS module. The `purs` compiler (wrapped by `spago`)treats this module like a regular CommonJS module, and simply adds it as a dependency to the compiled PureScript module. However, when bundling code for the browser with `psc-bundle` or `spago bundle-app --to`, it is very important to follow the pattern above, assigning exports to the `exports` object using a property assignment. This is because `psc-bundle` recognizes this format, allowing unused JavaScript exports to be removed from bundled code.
 
 With these two pieces in place, we can now use the `encodeURIComponent` function from PureScript like any function written in PureScript. For example, if this declaration is saved as a module and loaded into PSCi, we can reproduce the calculation above:
 
@@ -81,7 +83,7 @@ $ spago repl
 
 We can also define our own functions in foreign modules. Here's an example of how to create and call a custom JavaScript function that squares a `Number`:
 
-`src/Test/Calculate.js`:
+`src/Test/Examples.js`:
 ```js
 "use strict";
 
@@ -90,9 +92,9 @@ exports.square = function(n) {
 };
 ```
 
-`src/Test/Calculate.purs`:
+`src/Test/Examples.purs`:
 ```hs
-module Test.Calculate where
+module Test.Examples where
 
 foreign import square :: Number -> Number
 ```
@@ -100,7 +102,7 @@ foreign import square :: Number -> Number
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > square 5.0
 25.0
 ```
@@ -131,7 +133,7 @@ foreign import diagonal :: Fn2 Number Number Number
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > import Data.Function.Uncurried
 > runFn2 diagonal 3.0 4.0
 5.0
@@ -162,7 +164,7 @@ foreign import diagonalArrow  :: Number -> Number -> Number
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > diagonalNested 3.0 4.0
 5.0
 > diagonalArrow 3.0 4.0
@@ -197,7 +199,7 @@ and we can apply a function of two arguments by using the `runFn2` function:
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > import Data.Function.Uncurried
 > runFn2 uncurriedAdd 3 10
 13
@@ -254,7 +256,7 @@ The remaining examples in this book will use arrow functions instead of nested f
 Todo - exercises should probably be written in a Test.Solutions module. We can add common types to a Test.Common module.
 
 ## Exercises
-1. (Medium) Write a JavaScript function `volumeFn` in the `Test.Calculate` module that finds the volume of a box. Use an `Fn` wrapper from `Data.Function.Uncurried`.
+1. (Medium) Write a JavaScript function `volumeFn` in the `Test.Solutions` module that finds the volume of a box. Use an `Fn` wrapper from `Data.Function.Uncurried`.
 2. (Medium) Rewrite `volumeFn` with arrow functions as `volumeArrow`.
 
 
@@ -263,13 +265,13 @@ Todo - exercises should probably be written in a Test.Solutions module. We can a
 The following data types may be passed between PureScript and JavaScript as-is:
 * Boolean
 * String
-* Int / Number
+* Int and Number (PureScript) / Number (JavaScript)
 * Array
-* Record / Object
+* Record (PureScript) / Object (JavaScript)
 
 We've already seen examples with the primitive types `String` and `Number`. We'll now take a look at the structural types `Array` and `Record` (`Object` in JavaScript).
 
-To demonstrate passing `Array`s, here's how to call a JavaScript function which takes an `Array` of `Int` and returns the cumulative sum as another array. Recall that since JavaScript does not have separate type for `Int`, both `Int` and `Number` in PureScript map to `Number` in JavaScript.
+To demonstrate passing `Array`s, here's how to call a JavaScript function which takes an `Array` of `Int` and returns the cumulative sum as another array. Recall that since JavaScript does not have a separate type for `Int`. Both `Int` and `Number` in PureScript translate to `Number` in JavaScript.
 
 ```hs
 foreign import cumulativeSums :: Array Int -> Array Int
@@ -290,7 +292,7 @@ exports.cumulativeSums = arr => {
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > cumulativeSums [1, 2, 3]
 [1,3,6]
 ```
@@ -318,7 +320,7 @@ exports.addComplex = a => b => {
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > addComplex { real: 1.0, imag: 2.0 } { real: 3.0, imag: 4.0 }
 { imag: 6.0, real: 4.0 }
 ```
@@ -474,7 +476,7 @@ exports.unsafeHead = arr => {
 
 
 ## Exercises
-1. (Medium) Given a record that represents a quadratic polynomial `a*x^2 + b*x + c`:
+1. (Medium) Given a record that represents a quadratic polynomial `a*x^2 + b*x + c = 0`:
 ```hs
 type Quadratic = {
   a :: Number,
@@ -482,9 +484,7 @@ type Quadratic = {
   c :: Number
 }
 ```
-Write a JavaScript function `quadraticRootsImpl` and a wrapper `quadraticRoots :: Quadratic -> Pair Complex` in the `Test.Calculate` module that uses the quadratic formula to find the roots of this polynomial. Return the two roots as a `Pair` of `Complex` numbers. *Hint:* Use the `quadraticRoots` wrapper to pass a constructor for `Pair` to `quadraticRootsImpl`.
-
-Todo - sort pair for test
+Write a JavaScript function `quadraticRootsImpl` and a wrapper `quadraticRoots :: Quadratic -> Pair Complex` that uses the quadratic formula to find the roots of this polynomial. Return the two roots as a `Pair` of `Complex` numbers. *Hint:* Use the `quadraticRoots` wrapper to pass a constructor for `Pair` to `quadraticRootsImpl`.
 
 ## Using Type Class Member Functions
 
@@ -514,7 +514,7 @@ We can then call the wrapper:
 ```text
 $ spago repl
 
-> import Test.Display
+> import Test.Examples
 > import Data.Tuple
 > boldWrap (Tuple 1 "Hat")
 "(TUPLE 1 \"HAT\")!!!"
@@ -538,7 +538,7 @@ We can then avoid a wrapper and call the foreign function directly:
 ```text
 $ spago repl
 
-> import Test.Display
+> import Test.Examples
 > import Data.Tuple
 > boldConstraint (Tuple 1 "Hat")
 "(TUPLE 1 \"HAT\")!!!"
@@ -565,7 +565,7 @@ foreign import showEquality :: forall a. Eq a => Show a => a -> a -> String
 ```text
 $ spago repl
 
-> import Test.Display
+> import Test.Examples
 > import Data.Maybe
 > showEquality Nothing (Just 5)
 "Nothing is not equal to (Just 5)"
@@ -590,7 +590,7 @@ When testing this in the repl, notice that string is printed directly to the con
 ```text
 $ spago repl
 
-> import Test.Display
+> import Test.Examples
 > import Data.Tuple
 > yell (Tuple 1 "Hat")
 (TUPLE 1 "HAT")!!!
@@ -620,7 +620,7 @@ foreign import diagonalLog :: EffectFn2 Number Number Number
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > import Effect.Uncurried
 > runEffectFn2 diagonalLog 3.0 4.0
 Diagonal is 5
@@ -648,7 +648,7 @@ We can then convert this `Promise` to an `Aff` with `toAff`.
 $ spago repl
 
 > import Prelude
-> import Test.Calculate
+> import Test.Examples
 > import Control.Promise
 > import Effect.Class.Console
 > import Effect.Aff
@@ -668,8 +668,8 @@ Note that asynchronous logging in the repl just waits to print until the entire 
 PureScript's `Promise` type also represents `async`/`await` functions, which are just syntactic sugar for promises. Here we use the `async` keyword for the last parameter:
 
 ```js
-exports.diagonalAsync = w => async h => {
-  await exports.sleep(300);
+exports.diagonalAsync = delay => w => async h => {
+  await exports.sleep(delay);
   return Math.sqrt(w * w + h * h);
 };
 ```
@@ -677,20 +677,20 @@ exports.diagonalAsync = w => async h => {
 Since we're returning a `Number` we represent this type in the `Promise`:
 
 ```hs
-foreign import diagonalAsync :: Number -> Number -> Promise Number
+foreign import diagonalAsync :: Int -> Number -> Number -> Promise Number
 ```
 
 ```text
 $ spago repl
 
 import Prelude
-import Test.Calculate
+import Test.Examples
 import Control.Promise
 import Effect.Class.Console
 import Effect.Aff
 > :pa
 … launchAff_ do
-…   res <- toAff $ diagonalAsync 3.0 4.0
+…   res <- toAff $ diagonalAsync 300 3.0 4.0
 …   logShow res
 …
 unit
@@ -700,14 +700,14 @@ unit
 We can also wrap `Promise` with `Effect`:
 
 ```hs
-foreign import diagonalAsyncEffect :: Number -> Number -> Effect (Promise Number)
+foreign import diagonalAsyncEffect :: Int -> Number -> Number -> Effect (Promise Number)
 ```
 
 The corresponding JavaScript needs to return a function of zero arguments to represent the `Effect`:
 
 ```js
-exports.diagonalAsyncEffect = w => h => async function() {
-  await exports.sleep(300);
+exports.diagonalAsyncEffect = delay => w => h => async function() {
+  await exports.sleep(delay);
   return Math.sqrt(w * w + h * h);
 };
 ```
@@ -717,13 +717,13 @@ And `toAffE` is used instead of `toAff` to convert to an `Aff`:
 $ spago repl
 
 import Prelude
-import Test.Calculate
+import Test.Examples
 import Control.Promise
 import Effect.Class.Console
 import Effect.Aff
 > :pa
 … launchAff_ do
-…   res <- toAffE $ diagonalAsyncEffect 3.0 4.0
+…   res <- toAffE $ diagonalAsyncEffect 300 3.0 4.0
 …   logShow res
 …
 unit
@@ -771,7 +771,7 @@ We can even execute the code, which might either produce unexpected results or a
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > import Data.Foldable (sum)
 
 > sums = cumulativeSumsBroken [1, 2, 3]
@@ -825,7 +825,7 @@ Then any values that can't be successfully decoded to our return type appear as 
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 
 > cumulativeSumsDecoded [1, 2, 3]
 (Left "Couldn't decode Array (Failed at index 3): Value is not a Number")
@@ -834,8 +834,9 @@ $ spago repl
 (Left "JSON was missing expected field: imag")
 ```
 
-If we call the working versions, a `Right` value is returned
+If we call the working versions, a `Right` value is returned.
 
+Modify the JavaScript file with the following change to point to the working versions before running the next repl block.
 ```js
 exports.cumulativeSumsJson = exports.cumulativeSums
 exports.addComplexJson = exports.addComplex
@@ -844,7 +845,7 @@ exports.addComplexJson = exports.addComplex
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 
 > cumulativeSumsDecoded [1, 2, 3]
 (Right [1,3,6])
@@ -876,7 +877,7 @@ Now we can send and receive a `Map` over the FFI:
 ```text
 $ spago repl
 
-> import Test.Calculate
+> import Test.Examples
 > import Data.Map
 > import Data.Tuple
 
@@ -1084,6 +1085,15 @@ alert $ "Error: " <> err <> ". Loading examplePerson"
  1. (Easy) Write a wrapper for the `confirm` method on the JavaScript `Window` object, and add your foreign function to the `Effect.Alert` module.
  1. (Medium) Call this `confirm` function when a users clicks the "Reset" button to ask if they're sure they want to reset their address book.
 
+## Conclusion
+
+In this chapter, we've learned how to work with foreign JavaScript code from PureScript and we've seen the issues involved with writing trustworthy code using the FFI:
+- We've seen the importance of ensuring that foreign functions have correct representations.
+- We learned how to deal with corner cases like null values and other types of JavaScript data, by using foreign types, or the `Json` data type.
+- We saw how to safely serialize and deserialize JSON data.
+
+For more examples, the `purescript`, `purescript-contrib` and `purescript-node` GitHub organizations provide plenty of examples of libraries which use the FFI. In the remaining chapters, we will see some of these libraries put to use to solve real-world problems in a type-safe way.
+
 ## Addendum
 
 Todo -
@@ -1101,21 +1111,10 @@ Phil originally had a JS app with a pure PS core when he wrote the book, but tha
 This guide has some details on embedding effectful PS within a React JS app.
 https://thomashoneyman.com/articles/replace-react-components-with-purescript/#replacing-a-react-component-with-purescript-react
 
-
-The content on
-
-
-I don't think content on runtime representation and calling
-Content on runtime representation
-
-The below sections on runtime
-
-runtime representations too.
-Move these to end - What should this section be called:
-Additional Content, Addendum?
-
-
-
+The simpler argonaut workflow replaced these sections in the original text:
+- Working With Untyped Data
+- Handling Null and Undefined Values
+- Generic JSON Serialization
 
 ## Calling PureScript from JavaScript
 
@@ -1307,7 +1306,7 @@ A full discussion of _parametric polymorphism_ and _parametricity_ is beyond the
 
 ## Representing Constrained Types
 
-Todo - Remove this section as described in https://github.com/purescript/documentation/issues/273
+Todo - Note that it is [not advised](https://github.com/purescript/documentation/issues/273) to call functions via explicit type class dictionaries, as this section describes.
 
 Functions with a type class constraint have an interesting representation at runtime. Because the behavior of the function might depend on the type class instance chosen by the compiler, the function is given an additional argument, called a _type class dictionary_, which contains the implementation of the type class functions provided by the chosen instance.
 
@@ -1399,168 +1398,3 @@ require('Main').main();
 ```
 
 When using `spago bundle-app --to` or `spago run`, this call to `main` is generated automatically, whenever the `Main` module is defined.
-
-
-## Below sections replaced by argonaut
-
-## Working With Untyped Data
-
-In this section, we will see how we can use the `Foreign` library to turn untyped data into typed data, with the correct runtime representation for its type.
-
-The code for this chapter demonstrates how a record can be serialized to JSON and then stored in and retrieved from local storage.
-
-The `Main` module defines a type for the saved form data:
-
-```haskell
-newtype FormData = FormData
-  { firstName  :: String
-  , lastName   :: String
-  }
-```
-
-The problem is that we have no guarantee that the JSON will have the correct form. Put another way, we don't know that the JSON represents the correct type of data at runtime. This is the sort of problem that is solved by the `foreign` library. Here are some other examples:
-
-- A JSON response from a web service
-- A value passed to a function from JavaScript code
-
-Let's try the `foreign` and `foreign-generic` libraries in PSCi.
-
-Start by importing some modules:
-
-```text
-> import Foreign
-> import Foreign.Generic
-> import Foreign.JSON
-```
-
-A good way to obtain a `Foreign` value is to parse a JSON document. `foreign-generic` defines the following two functions:
-
-```haskell
-parseJSON :: String -> F Foreign
-decodeJSON :: forall a. Decode a => String -> F a
-```
-
-The type constructor `F` is actually just a type synonym, defined in `Foreign`:
-
-```haskell
-type F = Except MultipleErrors
-```
-
-Here, `Except` is a monad for handling exceptions in pure code, much like `Either`. We can convert a value in the `F` monad into a value in the `Either` monad by using the `runExcept` function.
-
-Most of the functions in the `foreign` and `foreign-generic` libraries return a value in the `F` monad, which means that we can use do notation and the applicative functor combinators to build typed values.
-
-The `Decode` type class represents those types which can be obtained from untyped data. There are type class instances defined for the primitive types and arrays, and we can define our own instances as well.
-
-Let's try parsing some simple JSON documents using `decodeJSON` in PSCi (remembering to use `runExcept` to unwrap the results):
-
-```text
-> import Control.Monad.Except
-
-> runExcept (decodeJSON "\"Testing\"" :: F String)
-Right "Testing"
-
-> runExcept (decodeJSON "true" :: F Boolean)
-Right true
-
-> runExcept (decodeJSON "[1, 2, 3]" :: F (Array Int))
-Right [1, 2, 3]
-```
-
-Recall that in the `Either` monad, the `Right` data constructor indicates success. Note however, that invalid JSON, or an incorrect type leads to an error:
-
-```text
-> runExcept (decodeJSON "[1, 2, true]" :: F (Array Int))
-(Left (NonEmptyList (NonEmpty (ErrorAtIndex 2 (TypeMismatch "Int" "Boolean")) Nil)))
-```
-
-The `foreign-generic` library tells us where in the JSON document the type error occurred.
-
-## Handling Null and Undefined Values
-
-Real-world JSON documents contain null and undefined values, so we need to be able to handle those too. `foreign-generic` solves this problem with the 'Maybe' type constructor to represent missing values.
-
-Todo - the content about NullOrUndefined versus Maybe seems good to include from original
-
-```text
-> import Prelude
-> import Foreign.NullOrUndefined
-
-> runExcept (decodeJSON "42" :: F (Maybe Int))
-(Right (Just 42))
-
-> runExcept (decodeJSON "null" :: F (Maybe Int))
-(Right Nothing)
-```
-
-The type `Maybe Int` represents values which are either integers, or null. What if we wanted to parse more interesting values, like arrays of integers, where each element might be `null`? `decodeJSON` handles such cases as well:
-
-```text
-> runExcept (decodeJSON "[1,2,null]" :: F (Array (Maybe Int)))
-(Right [(Just 1),(Just 2),Nothing])
-```
-
-## Generic JSON Serialization
-
-In fact, we rarely need to write instances for the `Decode` class, since the `foreign-generic` class allows us to _derive_ instances using a technique called _datatype-generic programming_. A full explanation of this technique is beyond the scope of this book, but it allows us to write functions once, and reuse them over many different data types, based on the structure of a the types themselves.
-
-To derive a `Decode` instance for our `FormData` type (so that we may deserialize it from its JSON representation), we first use the `derive` keyword to derive an instance of the `Generic` type class, which looks like this:
-
-```haskell
-import Data.Generic.Rep
-derive instance genericFormData :: Generic FormData _
-```
-
-Next, we simply define the `decode` function using the `genericDecode` function, as follows:
-
-```haskell
-import Foreign.Class
-instance decodeFormData :: Decode FormData where
-  decode = genericDecode (defaultOptions { unwrapSingleConstructors = true })
-```
-
-In fact, we can also derive an _encoder_ in the same way:
-
-```haskell
-instance encodeFormData :: Encode FormData where
-  encode = genericEncode (defaultOptions { unwrapSingleConstructors = true })
-```
-Todo - probably don't need generic show for this if it's a record.
-
-And even an instance of Show which comes in handy for logging the result:
-
-```haskell
-instance showFormData :: Show FormData where
-  show = genericShow
-```
-
-It is important that we use the same options in the decoder and encoder, otherwise our encoded JSON documents might not get decoded correctly.
-
-Now, in our main function, a value of type `FormData` is passed to the `encode` function, serializing it as a JSON document. The `FormData` type is a newtype for a record, so a value of type `FormData` passed to `encode` will be serialized as a JSON _object_. This is because we used the `unwrapSingleConstructors` option when defining our JSON encoder.
-
-Our `Decode` type class instance is used with `decodeJSON` to parse the JSON document when it is retrieved from local storage, as follows:
-
-```haskell
-loadSavedData = do
-  item <- getItem "person"
-
-  let
-    savedData :: Either (NonEmptyList ForeignError) (Maybe FormData)
-    savedData = runExcept do
-      jsonOrNull <- traverse readString =<< readNullOrUndefined item
-      traverse decodeJSON jsonOrNull
-```
-
-The `savedData` action reads the `FormData` structure in two steps: first, it parses the `Foreign` value obtained from `getItem`. The type of `jsonOrNull` is inferred by the compiler to be `Maybe String` (exercise for the reader - how is this type inferred?). The `traverse` function is then used to apply `decodeJSON` to the (possibly missing) element of the result of type `Maybe String`. The type class instance inferred for `decodeJSON` is the one we just wrote, resulting in a value of type `F (Maybe FormData)`.
-
-We need to use the monadic structure of `F`, since the argument to `traverse` uses the result `jsonOrNull` obtained in the first line.
-
-There are three possibilities for the result of `FormData`:
-
-- If the outer constructor is `Left`, then there was an error parsing the JSON string, or it represented a value of the wrong type. In this case, the application displays an error using the `alert` action we wrote earlier.
-- If the outer constructor is `Right`, but the inner constructor is `Nothing`, then `getItem` also returned `Nothing` which means that the key did not exist in local storage. In this case, the application continues quietly.
-- Finally, a value matching the pattern `Right (Just _)` indicates a successfully parsed JSON document. In this case, the application updates the form fields with the appropriate values.
-
-Try out the code, by running `spago bundle-app --to dist/Main.js`, and then opening the browser to `html/index.html`. You should be able to see what's going on in the console.
-
-_Note_: You may need to serve the HTML and JavaScript files from a HTTP server locally in order to avoid certain browser-specific issues.

@@ -16,6 +16,7 @@ You can edit this file as you like.
   , "random"
   , "react-basic-hooks"
   , "simple-json"
+  , "test-unit"
   , "validation"
   ]
 , packages = ./packages.dhall

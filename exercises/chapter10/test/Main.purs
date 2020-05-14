@@ -1,166 +1,193 @@
 module Test.Main where
 
 import Prelude
-import Test.Calculate
-import Test.Display
-
-import Control.Apply (lift2)
+import Test.Examples
+import Test.Solutions
 import Control.Promise (toAff, toAffE)
-import Data.Argonaut (class DecodeJson, jsonParser)
-import Data.Argonaut.Core (Json, stringify)
-import Data.Argonaut.Decode (decodeJson)
-import Data.Argonaut.Encode (class EncodeJson, encodeJson)
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Data.Foldable (sum)
-import Data.List (List(..), (:))
-import Data.Map (Map, fromFoldable)
-import Data.Map as Map
+import Data.Function.Uncurried (runFn2, runFn3)
 import Data.Maybe (Maybe(..))
 import Data.Pair (Pair(..))
-import Data.Set as Set
 import Data.Tuple (Tuple(..))
-import Data.Tuple.Nested ((/\))
 import Effect (Effect)
-import Effect.Aff (Aff)
-import Effect.Aff as Aff
-import Effect.Class.Console (clear, log, logShow)
-
--- Todo, should have a short test section that verifies all examples.
-type MyMap
-  = Map.Map (Set.Set String) Int
-
-myMap :: MyMap
-myMap =
-  Map.fromFoldable
-    [ Tuple (Set.fromFoldable [ "x", "y" ]) 12
-    , Tuple (Set.fromFoldable [ "y", "z" ]) 34
-    ]
-
-m1 :: Map.Map String Int
-m1 = Map.fromFoldable [ "a" /\ 1, "b" /\ 2, "c" /\ 3 ]
-
-m2 = Map.insert "x" 5 m1
-
-m3 = Map.delete "b" m2
-
-type MyRec
-  = { a :: Int, b :: Number }
-
-myrec = { a: 1, b: 2.0 }
-
-myrecStr = stringify $ encodeJson myrec
-
-myrecDec :: Effect Unit
-myrecDec =
-  case jsonParser "{\"b\":2,\"c\":1}" of
-    Left e1 -> log $ "Parsing error " <> e1
-    Right j -> case decodeJson j of
-      Left e2 -> log $ "Decoding error " <> e2
-      Right (r :: MyRec) -> log $ "Got record " <> show r
-
-qr :: QuadRec
-qr = { a: 1.0, b: 2.0, c: 3.0 }
-
-arr :: Array Int
-arr = [ 1, 2, 3 ]
-
-p1 :: Pair Int
-p1 = Pair 1 2
-
--- Kinda annoying needing to do newtype wrapping.
-newtype MyPair a
-  = MyPair (Pair a)
-
--- Got sidetracked investigating orphan instances.
-instance encodeJsonMyPair :: EncodeJson a => EncodeJson (MyPair a) where
-  encodeJson (MyPair (Pair x y)) = encodeJson [ x, y ]
-
-data MixPair a b = MixPair a b
-
-instance showMixPair :: (Show a, Show b) => Show (MixPair a b) where
-  show (MixPair a b) = "(MixPair " <> show a <> " " <> show b <> ")"
-
-instance decodeJsonMixPair :: (DecodeJson a, DecodeJson b) => DecodeJson (MixPair a b) where
-  decodeJson j = do
-    y <- decodeJson j
-    case y of
-      [a, b] -> lift2 MixPair (decodeJson a) (decodeJson b)
-      _ -> Left "Couldn't decode MixPair"
-{-
-  decodeJson j = do
-    y <- decodeJson j
-    case y of
-      (a : b : Nil) -> MixPair <$> decodeJson a <*> decodeJson b
-      _ -> Left "Couldn't decode MixPair"
--}
-{-
-  decodeJson j = decodeJson j >>= f
-    where
-    f (a : b : Nil) = MixPair <$> decodeJson a <*> decodeJson b
-    f _ = Left "Couldn't decode MixPair"
--}
-
-instance encodeJsonMixPair :: (EncodeJson a, EncodeJson b) => EncodeJson (MixPair a b) where
-  encodeJson (MixPair a b) = encodeJson [encodeJson a, encodeJson b]
+import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
+import Effect.Exception (Error, error, message, throw, try)
+import Effect.Uncurried (runEffectFn2)
+import Test.URI (encodeURIComponent)
+import Test.Unit (suite, test)
+import Test.Unit.Assert as Assert
+import Test.Unit.Main (runTest)
 
 main :: Effect Unit
-main = do
-  let
-    t = Tuple 1 "Hat"
-  logShow t
-  log $ boldWrap t
-  log $ boldConstraint t
-  log $ showEquality Nothing $ Just 5
-  yell t
-  logShow myMap
-  logShow m1
-  logShow m2
-  logShow m3
-  --log $ JSON.writeJSON m1 -- Doesn't quite work
-  log $ stringify $ encodeJson m3
-  log $ stringify $ encodeJson { some: 1, record: 2 }
-  logShow myrecStr
-  myrecDec
-  logShow $ showQuadRec qr
-  logShow $ sh [ 1, 2, 3 ]
-  logShow $ sh t
-  logShow $ sh m1
-  logShow $ sh m2
-  logShow $ sh m3
-  --log $ stringify $ encodeJson p1
-  log $ stringify $ encodeJson (Tuple 1 2)
-  log $ stringify $ encodeJson [ 1, 2 ]
-  log $ stringify $ encodeJson (MyPair $ Pair 1 2)
-  logShow $ quadraticRoots 1.0 2.0 3.0
-  logShow $ myArr []
-  logShow $ sum $ myArr []
-  logShow $ cumulativeSums [ 1, 2, 3 ]
-  logShow $ addComplex { real: 1.0, imag: 2.0 } { real: 3.0, imag: 4.0 }
-  logShow $ cumulativeSumsBroken [ 1, 2, 3 ]
-  --logShow $ addComplexBroken { real: 1.0, imag: 2.0 } { real: 3.0, imag: 4.0 }
-  --logShow $ cumulativeSumsDecoded [ 1, 2, 3 ]
-  --logShow $ addComplexDecoded { real: 1.0, imag: 2.0 } { real: 3.0, imag: 4.0 }
-  let
-    mp :: Map String Int
-    mp = fromFoldable [ Tuple "hat" 1, Tuple "cat" 2 ]
-  logShow $ mapSetFoo mp
-  logShow $ valuesOfMap mp
-  logShow $ Set.fromFoldable [1, 3]
-  let
-    mix = MixPair 1 "Hat"
-    menc = encodeJson mix
-  logShow mix
-  log $ stringify menc
-  logShow $ (decodeJson menc :: Either String (MixPair Int String))
+main =
+  runTest do
+    suite "Chapter Examples" do
+      test "uri"
+        $ Assert.equal "Hello%20World"
+        $ encodeURIComponent "Hello World"
+      test "square"
+        $ Assert.equal 25.0
+        $ square 5.0
+      test "diagonal"
+        $ Assert.equal 5.0
+        $ runFn2 diagonal 3.0 4.0
+      test "diagonalNested"
+        $ Assert.equal 5.0
+        $ diagonalNested 3.0 4.0
+      test "diagonalArrow"
+        $ Assert.equal 5.0
+        $ diagonalArrow 3.0 4.0
+      test "uncurriedAdd"
+        $ Assert.equal 13
+        $ runFn2 uncurriedAdd 3 10
+      test "curriedAdd"
+        $ Assert.equal 13
+        $ curriedAdd 3 10
+      test "cumulativeSums"
+        $ Assert.equal [ 1, 3, 6 ]
+        $ cumulativeSums [ 1, 2, 3 ]
+      test "addComplex"
+        $ Assert.equal { imag: 6.0, real: 4.0 }
+        $ addComplex { real: 1.0, imag: 2.0 } { real: 3.0, imag: 4.0 }
+      test "maybeHead - Just"
+        $ Assert.equal (Just 1)
+        $ maybeHead [ 1, 2, 3 ]
+      test "maybeHead - Nothing"
+        $ Assert.equal Nothing
+        $ maybeHead ([] :: Array Int)
+      test "isEmpty - false"
+        $ Assert.equal false
+        $ isEmpty [ 1, 2, 3 ]
+      test "isEmpty - true"
+        $ Assert.equal true
+        $ isEmpty []
+      -- It is not possible to test the thrown exception
+      -- by catching with a `try` because `unsafeHead`
+      -- lacks `Effect` in its return type.
+      -- Lifting with `pure` doesn't help in this situation.
+      test "unsafeHead - value"
+        $ Assert.equal 1
+        $ unsafeHead [ 1, 2, 3 ]
+      test "boldWrap"
+        $ Assert.equal "(TUPLE 1 \"HAT\")!!!"
+        $ boldWrap
+        $ Tuple 1 "Hat"
+      test "boldConstraint"
+        $ Assert.equal "(TUPLE 1 \"HAT\")!!!"
+        $ boldConstraint
+        $ Tuple 1 "Hat"
+      test "showEquality - not equal"
+        $ Assert.equal "Nothing is not equal to (Just 5)"
+        $ showEquality Nothing (Just 5)
+      test "showEquality - equivalent"
+        $ Assert.equal "Equivalent"
+        $ showEquality [ 1, 2 ] [ 1, 2 ]
+      -- Cannot test for actual logged value
+      test "yell" do
+        result <- liftEffect $ yell $ Tuple 1 "Hat"
+        Assert.equal unit result
+      test "diagonalLog" do
+        result <- liftEffect $ runEffectFn2 diagonalLog 3.0 4.0
+        Assert.equal 5.0 result
+      test "sleep" do
+        result <- toAff $ sleep 1
+        Assert.equal unit result
+      test "diagonalAsync" do
+        result <- toAff $ diagonalAsync 1 3.0 4.0
+        Assert.equal 5.0 result
+      test "diagonalAsyncEffect" do
+        result <- toAffE $ diagonalAsyncEffect 1 3.0 4.0
+        Assert.equal 5.0 result
+      suite "cumulativeSums Json" do
+        test "broken"
+          $ Assert.equal (Left "Couldn't decode Array (Failed at index 3): Value is not a Number")
+          $ cumulativeSumsDecodedBroken [ 1, 2, 3 ]
+        test "working"
+          $ Assert.equal (Right [ 1, 3, 6 ])
+          $ cumulativeSumsDecodedWorking [ 1, 2, 3 ]
+      suite "addComplex Json" do
+        test "broken"
+          $ Assert.equal (Left "JSON was missing expected field: imag")
+          $ addComplexDecodedBroken { real: 1.0, imag: 2.0 } { real: 3.0, imag: 4.0 }
+        test "working"
+          $ Assert.equal (Right { imag: 6.0, real: 4.0 })
+          $ addComplexDecodedWorking { real: 1.0, imag: 2.0 } { real: 3.0, imag: 4.0 }
+    -- Actual exercises
+    suite "Exercise Group - Calling JavaScript" do
+      suite "Exercise 1 - volumeFn" do
+        test "1 2 3"
+          $ Assert.equal 6.0
+          $ runFn3 volumeFn 1.0 2.0 3.0
+        test "1 0 3"
+          $ Assert.equal 0.0
+          $ runFn3 volumeFn 1.0 0.0 3.0
+      suite "Exercise 2 - volumeArrow" do
+        test "1 2 3"
+          $ Assert.equal 6.0
+          $ volumeArrow 1.0 2.0 3.0
+        test "1 0 3"
+          $ Assert.equal 0.0
+          $ volumeArrow 1.0 0.0 3.0
+    suite "Exercise Group - Passing Simple Types" do
+      suite "Exercise 1 - cumulativeSumsComplex" do
+        test "sequential"
+          $ Assert.equal
+              [ { real: 1.0, imag: 2.0 }
+              , { real: 4.0, imag: 6.0 }
+              , { real: 9.0, imag: 12.0 }
+              ]
+          $ cumulativeSumsComplex
+              [ { real: 1.0, imag: 2.0 }
+              , { real: 3.0, imag: 4.0 }
+              , { real: 5.0, imag: 6.0 }
+              ]
+    suite "Exercise Group - Beyond Simple Types" do
+      suite "Exercise 1 - quadraticRoots" do
+        test "Real"
+          $ Assert.equal
+              ( orderCpx
+                  $ Pair
+                      { real: 1.0, imag: 0.0 }
+                      { real: -3.0, imag: 0.0 }
+              )
+          $ orderCpx
+          $ quadraticRoots { a: 1.0, b: 2.0, c: -3.0 }
+        test "Imaginary"
+          $ Assert.equal
+              ( orderCpx
+                  $ Pair
+                      { real: 0.0, imag: 2.0 }
+                      { real: 0.0, imag: -2.0 }
+              )
+          $ orderCpx
+          $ quadraticRoots { a: 4.0, b: 0.0, c: 16.0 }
+        test "Complex"
+          $ Assert.equal
+              ( orderCpx
+                  $ Pair
+                      { real: -0.5, imag: 1.5 }
+                      { real: -0.5, imag: -1.5 }
+              )
+          $ orderCpx
+          $ quadraticRoots { a: 2.0, b: 2.0, c: 5.0 }
+        test "Repeated"
+          $ Assert.equal
+              ( orderCpx
+                  $ Pair
+                      { real: 1.0, imag: 0.0 }
+                      { real: 1.0, imag: 0.0 }
+              )
+          $ orderCpx
+          $ quadraticRoots { a: 3.0, b: -6.0, c: 3.0 }
 
-
-{-
-  Aff.launchAff_ do
-    log "waiting"
-    toAff $ sleep 300
-    log "done waiting"
-    res <- toAff $ diagonalAsync 3.0 4.0
-    logShow res
-    resE <- toAffE $ diagonalAsyncEffect 3.0 4.0
-    logShow resE
-  -}
+{-  Move this block comment starting point to enable more tests
+-}
+-- Put in ascending order by real, then imag components
+orderCpx :: Pair Complex -> Pair Complex
+orderCpx (Pair c1 c2)
+  | c1.real < c2.real = Pair c1 c2
+  | c1.real > c2.real = Pair c2 c1
+  | c1.imag < c2.imag = Pair c1 c2
+  | otherwise = Pair c2 c1
