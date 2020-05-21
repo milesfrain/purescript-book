@@ -23,8 +23,6 @@ main =
   runTest do
     test "Dummy test" do
       Assert.equal true true
-
-{-  Move this block comment starting point to enable more tests
     suite "Exercise Group 1" do
       suite "Exercise - Numeric operators that work with Maybe" do
         suite "addMaybe" do
@@ -219,4 +217,3 @@ main =
         test "Nothing"
           $ Assert.equal Nothing
           $ traverseUsingSequence fromNumber [ 1.0, 2.7 ]
--}
